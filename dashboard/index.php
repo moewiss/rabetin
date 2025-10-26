@@ -18,39 +18,453 @@ $socialMap = [];
 foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
 ?>
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Dashboard — Rabetin.bio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body{font-family:system-ui;background:#0f172a;color:#e2e8f0;margin:0}
-    header{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid #253046;background:#111827}
-    .wrap{max-width:1100px;margin:0 auto;padding:22px}
-    .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-    .tab{padding:10px 14px;border:1px solid #253046;border-radius:10px;background:#0b1220;cursor:pointer}
-    .tab.active{background:#111827}
-    .panel{display:none}
-    .panel.active{display:block}
-    .card{padding:16px;border:1px solid #253046;border-radius:14px;background:#0b1220;margin-bottom:16px}
-    input,textarea,select,button{padding:10px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:#e2e8f0}
-    input[type=file]{border:none}
-    label{display:block;margin-top:10px;margin-bottom:6px;opacity:.9}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-    .row{display:flex;gap:10px;align-items:center}
-    .btn{cursor:pointer}
-    .list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-    .item{display:flex;justify-content:space-between;align-items:center;padding:10px;border:1px solid #253046;border-radius:10px;background:#0f172a}
-    .item .handle{cursor:grab;margin-right:8px}
-    a{color:#93c5fd;text-decoration:none}
-    small{opacity:.7}
-    .driver-popover{background:#111827!important;color:#e2e8f0!important;border:1px solid #253046!important}
-    .driver-popover-title{color:#e2e8f0!important;font-weight:bold}
-    .driver-popover-description{color:#cbd5e1!important}
-    .driver-popover-next-btn{background:#1e40af!important;color:white!important;border:none!important}
-    .driver-popover-prev-btn{background:#374151!important;color:white!important;border:none!important}
-    .driver-popover-close-btn{color:#e2e8f0!important}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 20px 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    
+    .logo-accent {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .btn-tour {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    
+    .btn-tour:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-logout {
+      padding: 10px 20px;
+      background: #ffffff;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+      font-family: inherit;
+    }
+    
+    .btn-logout:hover {
+      background: #f8fafc;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+    
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    
+    .welcome-banner {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      color: #ffffff;
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+      animation: slideDown 0.5s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .welcome-banner h3 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    
+    .welcome-banner p {
+      font-size: 15px;
+      opacity: 0.95;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      background: #ffffff;
+      padding: 8px;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .tab {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    
+    .tab:hover {
+      background: #f8fafc;
+      color: #475569;
+    }
+    
+    .tab.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff;
+    }
+    
+    .tab a {
+      color: inherit;
+      text-decoration: none;
+    }
+    
+    .panel {
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    
+    .panel.active {
+      display: block;
+    }
+    
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+    }
+    
+    .card h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+    
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #475569;
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+    
+    label:first-child {
+      margin-top: 0;
+    }
+    
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 15px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #1e293b;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    input[type="color"] {
+      height: 48px;
+      padding: 4px;
+      cursor: pointer;
+    }
+    
+    input[type="file"] {
+      border: 2px dashed #cbd5e1;
+      background: #f8fafc;
+      padding: 20px;
+      cursor: pointer;
+    }
+    
+    input[type="file"]:hover {
+      border-color: #667eea;
+      background: #f1f5f9;
+    }
+    
+    input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    
+    .grid3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    
+    @media (max-width: 768px) {
+      .grid2, .grid3 {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn-secondary {
+      background: #ffffff;
+      color: #64748b;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .btn-secondary:hover {
+      background: #f8fafc;
+      color: #475569;
+      border-color: #cbd5e1;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      background: #f8fafc;
+      transition: all 0.2s ease;
+    }
+    
+    .item:hover {
+      border-color: #cbd5e1;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .item .handle {
+      cursor: grab;
+      margin-right: 12px;
+      font-size: 18px;
+      color: #94a3b8;
+    }
+    
+    .item .handle:active {
+      cursor: grabbing;
+    }
+    
+    .item strong {
+      text-transform: capitalize;
+      color: #1e293b;
+      font-weight: 600;
+    }
+    
+    .item input[type="text"], .item input[type="url"] {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .item input::placeholder {
+      color: #94a3b8;
+    }
+    
+    small {
+      display: block;
+      margin-top: 12px;
+      color: #64748b;
+      font-size: 13px;
+    }
+    
+    .avatar-preview {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+    }
+    
+    .avatar-preview img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .bg-preview {
+      margin-top: 16px;
+    }
+    
+    .bg-preview img {
+      width: 100%;
+      max-width: 300px;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .driver-popover {
+      background: #ffffff !important;
+      color: #1e293b !important;
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .driver-popover-title {
+      color: #1e293b !important;
+      font-weight: 700 !important;
+    }
+    
+    .driver-popover-description {
+      color: #64748b !important;
+    }
+    
+    .driver-popover-next-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 8px !important;
+      padding: 8px 16px !important;
+      font-weight: 600 !important;
+    }
+    
+    .driver-popover-prev-btn {
+      background: #f1f5f9 !important;
+      color: #64748b !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 8px !important;
+      padding: 8px 16px !important;
+      font-weight: 600 !important;
+    }
+    
+    .driver-popover-close-btn {
+      color: #64748b !important;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
@@ -58,17 +472,21 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
 </head>
 <body>
 <header>
-  <strong>Rabetin.bio — Dashboard</strong>
-  <nav>
-    <button id="startTour" class="btn" style="margin-right:16px;padding:8px 16px;background:#1e40af;border:none;border-radius:8px;cursor:pointer">📖 Take a Tour</button>
-    <a href="/logout.php">Logout</a>
-  </nav>
+  <div class="header-content">
+    <div class="logo">
+      <span class="logo-accent">Rabetin</span>.bio Dashboard
+    </div>
+    <nav class="header-nav">
+      <button id="startTour" class="btn-tour">📖 Take a Tour</button>
+      <a href="/logout.php" class="btn-logout">Logout</a>
+    </nav>
+  </div>
 </header>
 <div class="wrap">
   <?php if ($wizard_completed_msg): ?>
-    <div style="padding:16px;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius:14px;margin-bottom:20px;text-align:center">
-      <h3 style="margin:0 0 8px 0">🎉 Welcome to Rabetin.bio!</h3>
-      <p style="margin:0;opacity:0.95">Your profile is set up! Explore all the features below to customize your page.</p>
+    <div class="welcome-banner">
+      <h3>🎉 Welcome to Rabetin.bio!</h3>
+      <p>Your profile is set up! Explore all the features below to customize your page.</p>
     </div>
   <?php endif; ?>
   <div class="tabs">
@@ -106,11 +524,15 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
             <label>Avatar</label>
             <input type="file" name="avatar" accept="image/*">
             <?php if (!empty($profile['avatar'])): ?>
-              <div style="margin-top:8px"><img src="<?=htmlspecialchars($profile['avatar'])?>" alt="" style="width:96px;height:96px;border-radius:999px;object-fit:cover"></div>
+              <div class="avatar-preview">
+                <img src="<?=htmlspecialchars($profile['avatar'])?>" alt="Avatar">
+              </div>
             <?php endif; ?>
           </div>
         </div>
-        <div style="margin-top:12px"><button class="btn" type="submit">Save Profile</button></div>
+        <div style="margin-top: 24px;">
+          <button class="btn" type="submit">Save Profile</button>
+        </div>
       </form>
     </div>
   </div>
@@ -133,12 +555,16 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
             <input type="color" name="gradient_end" value="<?=htmlspecialchars($profile['gradient_end']??'')?>">
           </div>
         </div>
-        <label style="margin-top:12px">Background image</label>
+        <label>Background image</label>
         <input type="file" name="bg_image" accept="image/*">
         <?php if (!empty($profile['bg_image'])): ?>
-          <div style="margin-top:8px"><img src="<?=htmlspecialchars($profile['bg_image'])?>" alt="" style="width:220px;border-radius:12px"></div>
+          <div class="bg-preview">
+            <img src="<?=htmlspecialchars($profile['bg_image'])?>" alt="Background">
+          </div>
         <?php endif; ?>
-        <div style="margin-top:12px"><button class="btn" type="submit">Save Background</button></div>
+        <div style="margin-top: 24px;">
+          <button class="btn" type="submit">Save Background</button>
+        </div>
         <small>Tip: set gradient OR image; image wins if both are set.</small>
       </form>
     </div>
@@ -166,7 +592,9 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
           <?php endforeach; ?>
         </div>
         <input type="hidden" name="order" id="socialOrder">
-        <div style="margin-top:12px"><button class="btn" type="submit">Save Socials</button></div>
+        <div style="margin-top: 24px;">
+          <button class="btn" type="submit">Save Socials</button>
+        </div>
         <small>Drag the ☰ handle to reorder your icons.</small>
       </form>
     </div>
@@ -192,17 +620,17 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
             </div>
             <div class="row">
               <a href="<?=htmlspecialchars($l['url'])?>" target="_blank"><?=htmlspecialchars($l['url'])?></a>
-              <form method="post" action="/dashboard/toggle_link.php" style="margin-left:10px">
+              <form method="post" action="/dashboard/toggle_link.php" style="margin: 0;">
                 <input type="hidden" name="id" value="<?=$l['id']?>">
                 <input type="hidden" name="state" value="<?=$l['is_active']?0:1?>">
-                <button class="btn" type="submit"><?=$l['is_active']?'Disable':'Enable'?></button>
+                <button class="btn btn-secondary" type="submit"><?=$l['is_active']?'Hide':'Show'?></button>
               </form>
             </div>
           </div>
         <?php endforeach; ?>
       </div>
       <input type="hidden" id="linksOrder">
-      <div style="margin-top:12px">
+      <div style="margin-top: 24px;">
         <button class="btn" id="saveLinksOrder">Save Order</button>
       </div>
     </div>
@@ -226,7 +654,9 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
             <textarea name="custom" rows="4" placeholder="<iframe ...>"></textarea>
           </div>
         </div>
-        <div style="margin-top:12px"><button class="btn" type="submit">Save Embeds</button></div>
+        <div style="margin-top: 24px;">
+          <button class="btn" type="submit">Save Embeds</button>
+        </div>
         <small>Note: official “full feed” embeds often require third-party widgets. We support pasting any safe embed HTML.</small>
       </form>
     </div>
