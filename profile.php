@@ -377,7 +377,7 @@ function icon_svg($p){
     <?php if ($links): ?>
       <div class="links-container">
         <?php foreach ($links as $l): ?>
-          <a class="link" href="<?=htmlspecialchars($l['url'])?>" target="_blank" rel="noopener noreferrer">
+          <a class="link" href="/track_click.php?id=<?=$l['id']?>" target="_blank" rel="noopener noreferrer">
             <?=htmlspecialchars($l['title'])?>
           </a>
         <?php endforeach; ?>

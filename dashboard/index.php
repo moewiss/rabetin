@@ -6,6 +6,17 @@ require_wizard_completed();
 
 $user_id = current_user_id();
 $wizard_completed_msg = isset($_GET['wizard_completed']) ? true : false;
+$activeTab = $_GET['tab'] ?? 'profile';
+
+// Get success/error messages
+$success_msg = $_SESSION['success'] ?? '';
+$error_msg = $_SESSION['error'] ?? '';
+unset($_SESSION['success'], $_SESSION['error']);
+
+// Get username for profile URL
+$username = $pdo->prepare('SELECT username FROM users WHERE id=?');
+$username->execute([$user_id]);
+$username = $username->fetchColumn();
 
 // Fetch data
 $profile = $pdo->prepare('SELECT * FROM profiles WHERE user_id=?'); $profile->execute([$user_id]); $profile=$profile->fetch();
@@ -465,12 +476,220 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
     .driver-popover-close-btn {
       color: #64748b !important;
     }
+    
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 420px;
+    }
+    
+    .toast {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      border: 2px solid;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: toastSlideIn 0.3s ease-out;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    @keyframes toastSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    .toast-success {
+      border-color: #10b981;
+      color: #065f46;
+    }
+    
+    .toast-success::before {
+      content: '✓';
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #10b981;
+      color: #ffffff;
+      border-radius: 50%;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    
+    .toast-error {
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+    
+    .toast-error::before {
+      content: '✕';
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: #ef4444;
+      color: #ffffff;
+      border-radius: 50%;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    
+    /* Copy button */
+    .copy-btn {
+      padding: 8px 16px;
+      background: #f8fafc;
+      color: #64748b;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .copy-btn:hover {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      color: #475569;
+    }
+    
+    .copy-btn.copied {
+      background: #d1fae5;
+      border-color: #6ee7b7;
+      color: #065f46;
+    }
+    
+    /* Delete button */
+    .btn-delete {
+      padding: 8px 16px;
+      background: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #fca5a5;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    
+    .btn-delete:hover {
+      background: #fecaca;
+      border-color: #f87171;
+      color: #7f1d1d;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+    }
+    
+    /* Loading states */
+    .btn-loading {
+      position: relative;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    
+    .btn-loading::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      top: 50%;
+      left: 50%;
+      margin-left: -8px;
+      margin-top: -8px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 0.6s linear infinite;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    /* Profile URL box */
+    .profile-url-box {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 24px;
+    }
+    
+    .profile-url-box label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .url-display {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .url-text {
+      flex: 1;
+      padding: 12px 16px;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 15px;
+      color: #1e293b;
+      font-family: 'Monaco', 'Courier New', monospace;
+    }
+    
+    @media (max-width: 768px) {
+      .toast-container {
+        top: 12px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+      }
+      
+      .url-display {
+        flex-direction: column;
+      }
+      
+      .copy-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
   <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
 </head>
 <body>
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
 <header>
   <div class="header-content">
     <div class="logo">
@@ -479,7 +698,7 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
     <nav class="header-nav">
       <button id="startTour" class="btn-tour">📖 Take a Tour</button>
       <a href="/logout.php" class="btn-logout">Logout</a>
-    </nav>
+  </nav>
   </div>
 </header>
 <div class="wrap">
@@ -490,16 +709,16 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
     </div>
   <?php endif; ?>
   <div class="tabs">
-    <div class="tab active" data-tab="profile">Profile</div>
-    <div class="tab" data-tab="background">Background</div>
-    <div class="tab" data-tab="socials">Social Icons</div>
-    <div class="tab" data-tab="links">Custom Links</div>
-    <div class="tab" data-tab="embeds">Embeds</div>
-    <div class="tab" data-tab="preview"><a href="/<?=htmlspecialchars($pdo->query("SELECT username FROM users WHERE id=$user_id")->fetchColumn())?>" target="_blank" style="color:inherit">Preview ↗</a></div>
+    <div class="tab <?=$activeTab==='profile'?'active':''?>" data-tab="profile">Profile</div>
+    <div class="tab <?=$activeTab==='background'?'active':''?>" data-tab="background">Background</div>
+    <div class="tab <?=$activeTab==='socials'?'active':''?>" data-tab="socials">Social Icons</div>
+    <div class="tab <?=$activeTab==='links'?'active':''?>" data-tab="links">Custom Links</div>
+    <div class="tab <?=$activeTab==='embeds'?'active':''?>" data-tab="embeds">Embeds</div>
+    <div class="tab" data-tab="preview"><a href="/<?=htmlspecialchars($username)?>" target="_blank" style="color:inherit">Preview ↗</a></div>
   </div>
 
   <!-- Profile -->
-  <div class="panel active" id="panel-profile">
+  <div class="panel <?=$activeTab==='profile'?'active':''?>" id="panel-profile">
     <div class="card">
       <form action="/dashboard/save_profile.php" method="post" enctype="multipart/form-data">
         <div class="grid2">
@@ -534,11 +753,22 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
           <button class="btn" type="submit">Save Profile</button>
         </div>
       </form>
+      
+      <!-- Profile URL Section -->
+      <div class="profile-url-box">
+        <label>Your Profile URL</label>
+        <div class="url-display">
+          <div class="url-text" id="profileUrl"><?=htmlspecialchars($_SERVER['HTTP_HOST'] ?? 'rabetin.bio').'/' .$username?></div>
+          <button class="copy-btn" id="copyUrlBtn" onclick="copyProfileUrl()">
+            <span id="copyBtnText">📋 Copy</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Background -->
-  <div class="panel" id="panel-background">
+  <div class="panel <?=$activeTab==='background'?'active':''?>" id="panel-background">
     <div class="card">
       <form action="/dashboard/save_background.php" method="post" enctype="multipart/form-data">
         <div class="grid3">
@@ -571,7 +801,7 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
   </div>
 
   <!-- Social Icons -->
-  <div class="panel" id="panel-socials">
+  <div class="panel <?=$activeTab==='socials'?'active':''?>" id="panel-socials">
     <div class="card">
       <form action="/dashboard/save_socials.php" method="post">
         <div class="list" id="socialList">
@@ -601,7 +831,7 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
   </div>
 
   <!-- Custom Links -->
-  <div class="panel" id="panel-links">
+  <div class="panel <?=$activeTab==='links'?'active':''?>" id="panel-links">
     <div class="card">
       <form method="post" action="/dashboard/add_link.php" class="row">
         <input name="title" placeholder="Title (e.g., Portfolio)" required>
@@ -614,17 +844,28 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
       <div class="list" id="linksList">
         <?php foreach ($links as $l): ?>
           <div class="item" data-id="<?=$l['id']?>">
-            <div class="row">
-              <span class="handle">☰</span>
-              <div><?=htmlspecialchars($l['title'])?></div>
-            </div>
-            <div class="row">
-              <a href="<?=htmlspecialchars($l['url'])?>" target="_blank"><?=htmlspecialchars($l['url'])?></a>
-              <form method="post" action="/dashboard/toggle_link.php" style="margin: 0;">
-                <input type="hidden" name="id" value="<?=$l['id']?>">
-                <input type="hidden" name="state" value="<?=$l['is_active']?0:1?>">
-                <button class="btn btn-secondary" type="submit"><?=$l['is_active']?'Hide':'Show'?></button>
-              </form>
+            <div class="row" style="justify-content: space-between; width: 100%;">
+              <div class="row" style="gap: 12px;">
+                <span class="handle">☰</span>
+                <div>
+                  <div style="font-weight: 600; margin-bottom: 4px;"><?=htmlspecialchars($l['title'])?></div>
+                  <a href="<?=htmlspecialchars($l['url'])?>" target="_blank" style="font-size: 13px; color: #64748b; text-decoration: none; display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?=htmlspecialchars($l['url'])?></a>
+                  <?php if (isset($l['click_count']) && $l['click_count'] > 0): ?>
+                    <small style="color: #10b981; margin-top: 4px; font-size: 12px;">📊 <?=$l['click_count']?> <?=$l['click_count']==1?'click':'clicks'?></small>
+                  <?php endif; ?>
+                </div>
+              </div>
+              <div class="row" style="gap: 8px;">
+                <form method="post" action="/dashboard/toggle_link.php" style="margin: 0;">
+                  <input type="hidden" name="id" value="<?=$l['id']?>">
+                  <input type="hidden" name="state" value="<?=$l['is_active']?0:1?>">
+                  <button class="btn btn-secondary" type="submit"><?=$l['is_active']?'Hide':'Show'?></button>
+                </form>
+                <form method="post" action="/dashboard/delete_link.php" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this link?');">
+                  <input type="hidden" name="id" value="<?=$l['id']?>">
+                  <button class="btn-delete" type="submit">Delete</button>
+                </form>
+              </div>
             </div>
           </div>
         <?php endforeach; ?>
@@ -637,7 +878,7 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
   </div>
 
   <!-- Embeds -->
-  <div class="panel" id="panel-embeds">
+  <div class="panel <?=$activeTab==='embeds'?'active':''?>" id="panel-embeds">
     <div class="card">
       <form action="/dashboard/save_embeds.php" method="post">
         <div class="grid3">
@@ -664,15 +905,79 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
 </div>
 
 <script>
-  // Tabs
+  // Toast Notification System
+  function showToast(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.animation = 'toastSlideIn 0.3s ease-out reverse';
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
+  }
+  
+  // Show messages from PHP
+  <?php if ($success_msg): ?>
+    showToast(<?=json_encode($success_msg)?>, 'success');
+  <?php endif; ?>
+  <?php if ($error_msg): ?>
+    showToast(<?=json_encode($error_msg)?>, 'error');
+  <?php endif; ?>
+  
+  // Copy Profile URL
+  function copyProfileUrl() {
+    const url = document.getElementById('profileUrl').textContent;
+    const protocol = window.location.protocol + '//';
+    const fullUrl = protocol + url;
+    
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      const btn = document.getElementById('copyUrlBtn');
+      const btnText = document.getElementById('copyBtnText');
+      btn.classList.add('copied');
+      btnText.textContent = '✓ Copied!';
+      
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btnText.textContent = '📋 Copy';
+      }, 2000);
+      
+      showToast('Profile URL copied to clipboard!', 'success');
+    }).catch(() => {
+      showToast('Failed to copy URL', 'error');
+    });
+  }
+  
+  // Form Loading States
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function(e) {
+      const submitBtn = this.querySelector('button[type="submit"]');
+      if (submitBtn && !submitBtn.classList.contains('btn-loading')) {
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+      }
+    });
+  });
+  
+  // Tabs with URL updates
   document.querySelectorAll('.tab').forEach(t=>{
     t.addEventListener('click', ()=>{
+      const tabName = t.dataset.tab;
+      if (tabName === 'preview') return; // Skip preview tab
+      
       document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
       document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
       t.classList.add('active');
-      const id = 'panel-'+t.dataset.tab;
+      const id = 'panel-'+tabName;
       const p = document.getElementById(id);
       if (p) p.classList.add('active');
+      
+      // Update URL without reload
+      const url = new URL(window.location);
+      url.searchParams.set('tab', tabName);
+      window.history.pushState({}, '', url);
     });
   });
 
@@ -698,13 +1003,30 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
     });
   }
   document.getElementById('saveLinksOrder')?.addEventListener('click', async ()=>{
-    const order = Array.from(linksList.children).map(x=>x.dataset.id);
-    const res = await fetch('/dashboard/reorder_links.php', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({order})
-    });
-    alert(await res.text());
+    const btn = document.getElementById('saveLinksOrder');
+    btn.classList.add('btn-loading');
+    btn.disabled = true;
+    
+    try {
+      const order = Array.from(linksList.children).map(x=>x.dataset.id);
+      const res = await fetch('/dashboard/reorder_links.php', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({order})
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+      } else {
+        showToast(data.message, 'error');
+      }
+    } catch (error) {
+      showToast('Failed to save order', 'error');
+    } finally {
+      btn.classList.remove('btn-loading');
+      btn.disabled = false;
+    }
   });
 
   // Tour Feature
