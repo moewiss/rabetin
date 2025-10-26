@@ -1,0 +1,26 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "rabetin/bio-link-builder",
+    "type": "project",
+    "description": "A simple bio link builder application",
+    "keywords": ["bio", "links", "profile"],
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "guzzlehttp/guzzle": "^7.10"
+    },
+    "autoload": {
+        "files": [
+            "includes/db.php",
+            "includes/auth.php",
+            "includes/services/OdooService.php"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

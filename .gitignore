@@ -1,0 +1,11 @@
+.DS_Store
+.vscode/
+.idea/
+vendor/
+node_modules/
+composer.lock
+.env
+.env.*
+*.log
+storage/
+cache/
