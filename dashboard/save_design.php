@@ -23,12 +23,19 @@ $button_style = $_POST['button_style'] ?? 'rounded';
 $button_color = $_POST['button_color'] ?? '#667eea';
 $button_text_color = $_POST['button_text_color'] ?? '#ffffff';
 $button_shadow = isset($_POST['button_shadow']) ? 1 : 0;
+$button_hover_effect = isset($_POST['button_hover_effect']) ? 1 : 0;
 $link_layout = $_POST['link_layout'] ?? 'standard';
 $card_style = $_POST['card_style'] ?? 'glass';
 $text_color = $_POST['text_color'] ?? null;
 
+// Advanced button customization
+$button_radius = isset($_POST['button_radius']) ? intval($_POST['button_radius']) : 14;
+$button_border_color = $_POST['button_border_color'] ?? '#667eea';
+$button_border_width = isset($_POST['button_border_width']) ? intval($_POST['button_border_width']) : 0;
+$button_border_style = $_POST['button_border_style'] ?? 'solid';
+
 // Validation
-$valid_button_styles = ['rounded', 'sharp', 'pill'];
+$valid_button_styles = ['rounded', 'sharp', 'pill', 'custom'];
 if (!in_array($button_style, $valid_button_styles)) {
   $errors[] = 'Invalid button style';
 }
@@ -38,9 +45,22 @@ if (!in_array($link_layout, $valid_layouts)) {
   $errors[] = 'Invalid link layout';
 }
 
-$valid_card_styles = ['glass', 'solid', 'flat', 'card', 'neon'];
+$valid_card_styles = ['glass', 'solid', 'flat', 'card', 'neon', 'outlined'];
 if (!in_array($card_style, $valid_card_styles)) {
   $errors[] = 'Invalid card style';
+}
+
+$valid_border_styles = ['solid', 'dashed', 'dotted', 'double'];
+if (!in_array($button_border_style, $valid_border_styles)) {
+  $errors[] = 'Invalid button border style';
+}
+
+if ($button_radius < 0 || $button_radius > 100) {
+  $errors[] = 'Button radius must be between 0 and 100';
+}
+
+if ($button_border_width < 0 || $button_border_width > 10) {
+  $errors[] = 'Button border width must be between 0 and 10';
 }
 
 // Validate colors
@@ -49,6 +69,9 @@ if ($button_color && !preg_match('/^#[0-9A-F]{6}$/i', $button_color)) {
 }
 if ($button_text_color && !preg_match('/^#[0-9A-F]{6}$/i', $button_text_color)) {
   $errors[] = 'Invalid button text color';
+}
+if ($button_border_color && !preg_match('/^#[0-9A-F]{6}$/i', $button_border_color)) {
+  $errors[] = 'Invalid button border color';
 }
 if ($text_color && !preg_match('/^#[0-9A-F]{6}$/i', $text_color)) {
   $errors[] = 'Invalid text color';
@@ -132,6 +155,7 @@ try {
           button_color = ?,
           button_text_color = ?,
           button_shadow = ?,
+          button_hover_effect = ?,
           link_layout = ?,
           card_style = ?,
           theme = ?,
@@ -140,7 +164,11 @@ try {
           gradient_start = ?,
           gradient_end = ?,
           text_color = ?,
-          font_family = ?';
+          font_family = ?,
+          button_radius = ?,
+          button_border_color = ?,
+          button_border_width = ?,
+          button_border_style = ?';
       
       $params = [
         $template_preset,
@@ -148,6 +176,7 @@ try {
         $template['button_color'],
         $template['button_text_color'],
         $template['button_shadow'],
+        1, // button_hover_effect (templates have hover effect by default)
         $template['link_layout'],
         $template['card_style'],
         $template['theme'],
@@ -156,7 +185,11 @@ try {
         $template['gradient_start'],
         $template['gradient_end'],
         $template['text_color'],
-        $template['font_family']
+        $template['font_family'],
+        $template['button_radius'] ?? 14,
+        $template['button_border_color'] ?? $template['button_color'],
+        $template['button_border_width'] ?? 0,
+        'solid' // default border style for templates
       ];
       
       // Add avatar if uploaded
@@ -178,6 +211,7 @@ try {
         button_color = ?,
         button_text_color = ?,
         button_shadow = ?,
+        button_hover_effect = ?,
         link_layout = ?,
         card_style = ?,
         text_color = ?,
@@ -185,7 +219,11 @@ try {
         font_family = ?,
         bg_color = ?,
         gradient_start = ?,
-        gradient_end = ?';
+        gradient_end = ?,
+        button_radius = ?,
+        button_border_color = ?,
+        button_border_width = ?,
+        button_border_style = ?';
     
     $params = [
       'custom',
@@ -193,6 +231,7 @@ try {
       $button_color,
       $button_text_color,
       $button_shadow,
+      $button_hover_effect,
       $link_layout,
       $card_style,
       $text_color,
@@ -200,7 +239,11 @@ try {
       $font_family,
       $bg_color,
       $gradient_start,
-      $gradient_end
+      $gradient_end,
+      $button_radius,
+      $button_border_color,
+      $button_border_width,
+      $button_border_style
     ];
     
     // Add avatar if uploaded

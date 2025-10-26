@@ -5,7 +5,9 @@ $username = $_GET['username'] ?? '';
 if (!preg_match('/^[a-zA-Z0-9_]{3,20}$/', $username)) { http_response_code(404); echo "Not found"; exit; }
 
 $stmt = $pdo->prepare('
-  SELECT u.id AS user_id, u.username, p.display_name, p.bio, p.avatar, p.theme, p.bg_color, p.bg_image, p.gradient_start, p.gradient_end, p.font_family
+  SELECT u.id AS user_id, u.username, p.display_name, p.bio, p.avatar, p.theme, p.bg_color, p.bg_image, p.gradient_start, p.gradient_end, p.font_family,
+         p.button_style, p.button_color, p.button_text_color, p.button_shadow, p.link_layout, p.card_style, p.text_color,
+         p.button_radius, p.button_border_color, p.button_border_width, p.button_border_style, p.button_hover_effect
   FROM users u JOIN profiles p ON p.user_id = u.id
   WHERE u.username = ?
 ');
@@ -47,14 +49,22 @@ $button_style = $profile['button_style'] ?? 'rounded';
 $button_color = $profile['button_color'] ?? '#667eea';
 $button_text_color = $profile['button_text_color'] ?? '#ffffff';
 $button_shadow = $profile['button_shadow'] ?? 1;
+$button_hover_effect = $profile['button_hover_effect'] ?? 1;
 $link_layout = $profile['link_layout'] ?? 'standard';
 $card_style = $profile['card_style'] ?? 'glass';
 $text_color_custom = $profile['text_color'] ?? null;
 
-// Button border radius based on style
+// Advanced button customization
+$button_radius_custom = $profile['button_radius'] ?? 14;
+$button_border_color = $profile['button_border_color'] ?? $button_color;
+$button_border_width = $profile['button_border_width'] ?? 0;
+$button_border_style = $profile['button_border_style'] ?? 'solid';
+
+// Button border radius based on style (or custom value)
 $button_border_radius = match($button_style) {
   'pill' => '999px',
   'sharp' => '4px',
+  'custom' => $button_radius_custom . 'px',
   default => '14px'
 };
 
@@ -70,6 +80,7 @@ $card_bg = match($card_style) {
 $card_border = match($card_style) {
   'neon' => '2px solid ' . $button_color,
   'flat' => 'none',
+  'outlined' => '2px solid ' . $button_color,
   'glass' => '2px solid ' . ($theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(226, 232, 240, 0.8)'),
   default => '2px solid ' . ($theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(226, 232, 240, 0.8)')
 };
@@ -109,7 +120,7 @@ function icon_svg($p){
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;600;700&family=Lato:wght@400;700&family=Montserrat:wght@400;600;700&family=Raleway:wght@400;600;700&family=Work+Sans:wght@400;600;700&family=Nunito:wght@400;600;700&family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@400;600;700&family=Merriweather:wght@400;700&family=Lora:wght@400;600&family=PT+Serif:wght@400;700&family=Bebas+Neue&family=Archivo+Black&family=Anton&family=JetBrains+Mono:wght@400;600&family=Fira+Code:wght@400;600&family=Space+Mono:wght@400;700&family=Caveat:wght@400;600&family=Pacifico&family=Dancing+Script:wght@400;600&family=Creepster&family=Mountains+of+Christmas:wght@400;700&family=Quicksand:wght@400;600&family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -288,11 +299,11 @@ function icon_svg($p){
     }
     
     .link:hover::before {
-      left: 100%;
+      left: <?=$button_hover_effect?'100%':'-100%'?>;
     }
     
     .link:hover {
-      transform: translateY(-4px);
+      transform: <?=$button_hover_effect?'translateY(-4px) scale(1.02)':'translateY(-1px)'?>;
       filter: brightness(1.1);
       box-shadow: <?=$button_shadow?'0 8px 24px rgba(0, 0, 0, 0.3)':'0 4px 16px rgba(0, 0, 0, 0.15)'?>;
       <?php if ($card_style === 'neon'): ?>

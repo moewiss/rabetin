@@ -836,6 +836,55 @@ try {
       box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
       transition: all 0.2s ease;
     }
+    
+    /* Design Mode Tabs */
+    .design-mode-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0;
+    }
+    
+    .design-mode-tab {
+      flex: 1;
+      padding: 14px 24px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: #64748b;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      bottom: -2px;
+    }
+    
+    .design-mode-tab:hover {
+      color: #1e293b;
+      background: #f8fafc;
+    }
+    
+    .design-mode-tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+      background: linear-gradient(to bottom, rgba(102, 126, 234, 0.05), transparent);
+    }
+    
+    .design-mode-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .design-mode-content.active {
+      display: block;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
@@ -907,14 +956,24 @@ try {
   <div class="panel <?=$activeTab==='design'?'active':''?>" id="panel-design">
     <div class="card">
       <h3>🎨 Design Your Page</h3>
-      <p style="color: #64748b; margin-bottom: 24px;">All visual customization in one place - templates, colors, backgrounds, and more!</p>
+      <p style="color: #64748b; margin-bottom: 24px;">Choose from curated themes or customize every detail yourself!</p>
+      
+      <!-- Design Mode Tabs -->
+      <div class="design-mode-tabs">
+        <button type="button" class="design-mode-tab active" data-mode="curated" onclick="switchDesignMode('curated')">
+          ✨ Curated
+        </button>
+        <button type="button" class="design-mode-tab" data-mode="customizable" onclick="switchDesignMode('customizable')">
+          🎨 Customizable
+        </button>
+      </div>
       
       <form id="designForm" action="/dashboard/save_design.php" method="post" enctype="multipart/form-data">
-        <!-- Template Presets -->
-        <div style="margin-bottom: 32px;">
-          <label style="margin-top: 0;">Choose a Template</label>
-          <p style="color: #64748b; font-size: 13px; margin: 8px 0 16px 0;">
-            Click any template to instantly apply its design to your profile ✨
+        
+        <!-- CURATED MODE -->
+        <div id="curatedMode" class="design-mode-content active">
+          <p style="color: #64748b; font-size: 14px; margin: 20px 0 16px 0;">
+            Professional themes designed for you. Includes seasonal and trending designs! 🎃🎄
           </p>
           <div class="dashboard-template-grid">
             <?php if (empty($templates)): ?>
@@ -950,6 +1009,7 @@ try {
             <?php endif; ?>
           </div>
           <input type="hidden" name="template_preset" id="templatePreset" value="<?=htmlspecialchars($profile['template_preset']??'default')?>">
+          <input type="hidden" name="design_mode" id="designMode" value="curated">
           
           <!-- Quick Apply Template Button -->
           <?php if (!empty($templates)): ?>
@@ -961,9 +1021,21 @@ try {
               </button>
             </div>
           <?php endif; ?>
+          
+          <div style="margin-top: 20px; padding: 16px; background: #e0f2fe; border-radius: 12px; border-left: 4px solid #0ea5e9;">
+            <p style="margin: 0; color: #0c4a6e; font-size: 14px;">
+              💡 <strong>Curated themes</strong> come with pre-designed colors, fonts, and backgrounds. Perfect for quick setup!
+            </p>
+          </div>
         </div>
 
-        <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 32px 0;">
+        <!-- CUSTOMIZABLE MODE -->
+        <div id="customizableMode" class="design-mode-content">
+          <p style="color: #64748b; font-size: 14px; margin: 20px 0 16px 0;">
+            Full control over every design element. Create your unique style! 🎨
+          </p>
+          
+          <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 24px 0;">
 
         <!-- Profile Elements -->
         <h3 style="margin-bottom: 16px;">👤 Profile Elements</h3>
@@ -989,9 +1061,42 @@ try {
             
             <label style="margin-top: 16px;">Font Family</label>
             <select name="font_family">
-              <option value="system-ui" <?=($profile['font_family']??'')==='system-ui'?'selected':''?>>System</option>
-              <option value="Inter" <?=($profile['font_family']??'Inter')==='Inter'?'selected':''?>>Inter (Default)</option>
-              <option value="Poppins" <?=($profile['font_family']??'')==='Poppins'?'selected':''?>>Poppins</option>
+              <optgroup label="Sans-Serif">
+                <option value="Inter" <?=($profile['font_family']??'Inter')==='Inter'?'selected':''?>>Inter (Default)</option>
+                <option value="Poppins" <?=($profile['font_family']??'')==='Poppins'?'selected':''?>>Poppins</option>
+                <option value="Roboto" <?=($profile['font_family']??'')==='Roboto'?'selected':''?>>Roboto</option>
+                <option value="Open Sans" <?=($profile['font_family']??'')==='Open Sans'?'selected':''?>>Open Sans</option>
+                <option value="Lato" <?=($profile['font_family']??'')==='Lato'?'selected':''?>>Lato</option>
+                <option value="Montserrat" <?=($profile['font_family']??'')==='Montserrat'?'selected':''?>>Montserrat</option>
+                <option value="Raleway" <?=($profile['font_family']??'')==='Raleway'?'selected':''?>>Raleway</option>
+                <option value="Work Sans" <?=($profile['font_family']??'')==='Work Sans'?'selected':''?>>Work Sans</option>
+                <option value="Nunito" <?=($profile['font_family']??'')==='Nunito'?'selected':''?>>Nunito</option>
+                <option value="DM Sans" <?=($profile['font_family']??'')==='DM Sans'?'selected':''?>>DM Sans</option>
+              </optgroup>
+              <optgroup label="Serif">
+                <option value="Playfair Display" <?=($profile['font_family']??'')==='Playfair Display'?'selected':''?>>Playfair Display</option>
+                <option value="Merriweather" <?=($profile['font_family']??'')==='Merriweather'?'selected':''?>>Merriweather</option>
+                <option value="Lora" <?=($profile['font_family']??'')==='Lora'?'selected':''?>>Lora</option>
+                <option value="PT Serif" <?=($profile['font_family']??'')==='PT Serif'?'selected':''?>>PT Serif</option>
+              </optgroup>
+              <optgroup label="Display">
+                <option value="Bebas Neue" <?=($profile['font_family']??'')==='Bebas Neue'?'selected':''?>>Bebas Neue</option>
+                <option value="Archivo Black" <?=($profile['font_family']??'')==='Archivo Black'?'selected':''?>>Archivo Black</option>
+                <option value="Anton" <?=($profile['font_family']??'')==='Anton'?'selected':''?>>Anton</option>
+              </optgroup>
+              <optgroup label="Monospace">
+                <option value="JetBrains Mono" <?=($profile['font_family']??'')==='JetBrains Mono'?'selected':''?>>JetBrains Mono</option>
+                <option value="Fira Code" <?=($profile['font_family']??'')==='Fira Code'?'selected':''?>>Fira Code</option>
+                <option value="Space Mono" <?=($profile['font_family']??'')==='Space Mono'?'selected':''?>>Space Mono</option>
+              </optgroup>
+              <optgroup label="Handwriting">
+                <option value="Caveat" <?=($profile['font_family']??'')==='Caveat'?'selected':''?>>Caveat</option>
+                <option value="Pacifico" <?=($profile['font_family']??'')==='Pacifico'?'selected':''?>>Pacifico</option>
+                <option value="Dancing Script" <?=($profile['font_family']??'')==='Dancing Script'?'selected':''?>>Dancing Script</option>
+              </optgroup>
+              <optgroup label="System">
+                <option value="system-ui" <?=($profile['font_family']??'')==='system-ui'?'selected':''?>>System Default</option>
+              </optgroup>
             </select>
     </div>
   </div>
@@ -1032,33 +1137,39 @@ try {
 
         <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 32px 0;">
 
-        <!-- Button & Link Styles -->
-        <h3 style="margin-bottom: 16px;">🎨 Buttons & Links</h3>
-        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Customize button styles, colors, and layout</p>
+        <!-- Advanced Button Customization -->
+        <h3 style="margin-bottom: 16px;">🎨 Button Design</h3>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Complete control over button appearance</p>
         
-        <div class="grid2">
+        <div class="grid3">
           <div>
-            <label>Button Style</label>
+            <label>Button Shape</label>
             <select name="button_style">
-              <option value="rounded" <?=($profile['button_style']??'rounded')==='rounded'?'selected':''?>>Rounded (Default)</option>
-              <option value="sharp" <?=($profile['button_style']??'')==='sharp'?'selected':''?>>Sharp Corners</option>
-              <option value="pill" <?=($profile['button_style']??'')==='pill'?'selected':''?>>Pill Shape</option>
+              <option value="rounded" <?=($profile['button_style']??'rounded')==='rounded'?'selected':''?>>Rounded</option>
+              <option value="sharp" <?=($profile['button_style']??'')==='sharp'?'selected':''?>>Sharp</option>
+              <option value="pill" <?=($profile['button_style']??'')==='pill'?'selected':''?>>Pill</option>
+              <option value="custom" <?=($profile['button_style']??'')==='custom'?'selected':''?>>Custom Radius</option>
             </select>
+          </div>
+          
+          <div>
+            <label>Custom Border Radius (px)</label>
+            <input type="number" name="button_radius" min="0" max="100" value="<?=htmlspecialchars($profile['button_radius']??'14')?>" placeholder="14">
           </div>
 
           <div>
             <label>Link Layout</label>
             <select name="link_layout">
-              <option value="standard" <?=($profile['link_layout']??'standard')==='standard'?'selected':''?>>Standard (Default)</option>
+              <option value="standard" <?=($profile['link_layout']??'standard')==='standard'?'selected':''?>>Standard</option>
               <option value="full" <?=($profile['link_layout']??'')==='full'?'selected':''?>>Full Width</option>
               <option value="compact" <?=($profile['link_layout']??'')==='compact'?'selected':''?>>Compact</option>
             </select>
           </div>
         </div>
-
+        
         <div class="grid3" style="margin-top: 16px;">
           <div>
-            <label>Button Color</label>
+            <label>Button Fill Color</label>
             <input type="color" name="button_color" value="<?=htmlspecialchars($profile['button_color']??'#667eea')?>">
           </div>
 
@@ -1068,11 +1179,33 @@ try {
           </div>
 
           <div>
-            <label>Text Color (Optional)</label>
+            <label>Button Border Color</label>
+            <input type="color" name="button_border_color" value="<?=htmlspecialchars($profile['button_border_color']??'#667eea')?>">
+          </div>
+        </div>
+        
+        <div class="grid3" style="margin-top: 16px;">
+          <div>
+            <label>Border Width (px)</label>
+            <input type="number" name="button_border_width" min="0" max="10" value="<?=htmlspecialchars($profile['button_border_width']??'0')?>" placeholder="0">
+          </div>
+          
+          <div>
+            <label>Border Style</label>
+            <select name="button_border_style">
+              <option value="solid" <?=($profile['button_border_style']??'solid')==='solid'?'selected':''?>>Solid</option>
+              <option value="dashed" <?=($profile['button_border_style']??'')==='dashed'?'selected':''?>>Dashed</option>
+              <option value="dotted" <?=($profile['button_border_style']??'')==='dotted'?'selected':''?>>Dotted</option>
+              <option value="double" <?=($profile['button_border_style']??'')==='double'?'selected':''?>>Double</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Page Text Color</label>
             <input type="color" name="text_color" value="<?=htmlspecialchars($profile['text_color']??'#1e293b')?>">
           </div>
         </div>
-
+        
         <div class="grid2" style="margin-top: 16px;">
           <div>
             <label>Card Style</label>
@@ -1082,24 +1215,32 @@ try {
               <option value="flat" <?=($profile['card_style']??'')==='flat'?'selected':''?>>Flat</option>
               <option value="card" <?=($profile['card_style']??'')==='card'?'selected':''?>>Card</option>
               <option value="neon" <?=($profile['card_style']??'')==='neon'?'selected':''?>>Neon</option>
+              <option value="outlined" <?=($profile['card_style']??'')==='outlined'?'selected':''?>>Outlined</option>
             </select>
           </div>
 
-          <div style="display: flex; align-items: center; padding-top: 20px;">
+          <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 20px;">
             <label style="display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer;">
               <input type="checkbox" name="button_shadow" value="1" <?=($profile['button_shadow']??1)?'checked':''?>>
               <span>Button Shadow</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer;">
+              <input type="checkbox" name="button_hover_effect" value="1" <?=($profile['button_hover_effect']??1)?'checked':''?>>
+              <span>Hover Animation</span>
             </label>
           </div>
         </div>
 
         <div style="margin-top: 24px;">
-          <button class="btn" type="submit">Save Design</button>
+          <button class="btn" type="submit">💾 Save All Changes</button>
         </div>
         
-        <small style="display: block; margin-top: 12px;">
-          💡 Tip: Select a template for instant styling, or customize individual settings below for full control
+        <small style="display: block; margin-top: 12px; color: #64748b;">
+          💡 Tip: All your custom settings will be saved. You can switch back to curated themes anytime!
         </small>
+        </div>
+        <!-- END CUSTOMIZABLE MODE -->
+        
       </form>
     </div>
   </div>
@@ -1527,6 +1668,67 @@ try {
       tour.drive();
       localStorage.setItem('rabetin_tour_completed', 'true');
     }, 800);
+  }
+  
+  // Switch Design Mode (Curated vs Customizable)
+  function switchDesignMode(mode) {
+    // Update tabs
+    document.querySelectorAll('.design-mode-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.mode === mode);
+    });
+    
+    // Update content
+    document.querySelectorAll('.design-mode-content').forEach(content => {
+      content.classList.remove('active');
+    });
+    
+    if (mode === 'curated') {
+      document.getElementById('curatedMode').classList.add('active');
+      document.getElementById('designMode').value = 'curated';
+    } else {
+      document.getElementById('customizableMode').classList.add('active');
+      document.getElementById('designMode').value = 'customizable';
+    }
+  }
+  
+  // Apply Template (for curated mode)
+  async function applyTemplate() {
+    const templateSlug = document.getElementById('templatePreset').value;
+    if (!templateSlug || templateSlug === 'default') {
+      showToast('Please select a template first', 'error');
+      return;
+    }
+    
+    const formData = new FormData();
+    formData.append('template_preset', templateSlug);
+    formData.append('apply_template_only', '1');
+    
+    const btn = document.getElementById('applyTemplateBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Applying...';
+    
+    try {
+      const response = await fetch('/dashboard/save_design.php', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        showToast('✨ Template applied successfully!', 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast(data.message || 'Failed to apply template', 'error');
+        btn.disabled = false;
+        btn.textContent = '✨ Apply Template';
+      }
+    } catch (error) {
+      console.error('Apply template error:', error);
+      showToast('An error occurred', 'error');
+      btn.disabled = false;
+      btn.textContent = '✨ Apply Template';
+    }
   }
 </script>
 </body>
