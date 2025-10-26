@@ -866,7 +866,6 @@ try {
   <div class="tabs">
     <div class="tab <?=$activeTab==='profile'?'active':''?>" data-tab="profile">Profile</div>
     <div class="tab <?=$activeTab==='design'?'active':''?>" data-tab="design">🎨 Design</div>
-    <div class="tab <?=$activeTab==='background'?'active':''?>" data-tab="background">Background</div>
     <div class="tab <?=$activeTab==='socials'?'active':''?>" data-tab="socials">Social Icons</div>
     <div class="tab <?=$activeTab==='links'?'active':''?>" data-tab="links">Custom Links</div>
     <div class="tab <?=$activeTab==='embeds'?'active':''?>" data-tab="embeds">Embeds</div>
@@ -876,35 +875,16 @@ try {
   <!-- Profile -->
   <div class="panel <?=$activeTab==='profile'?'active':''?>" id="panel-profile">
     <div class="card">
-      <form action="/dashboard/save_profile.php" method="post" enctype="multipart/form-data">
-        <div class="grid2">
-          <div>
-            <label>Display name</label>
-            <input name="display_name" value="<?=htmlspecialchars($profile['display_name']??'')?>" required>
-            <label>Bio</label>
-            <textarea name="bio" rows="5" placeholder="Tell people about you..."><?=htmlspecialchars($profile['bio']??'')?></textarea>
-            <label>Theme</label>
-            <select name="theme">
-              <option value="dark" <?=($profile['theme']??'')==='dark'?'selected':''?>>Dark</option>
-              <option value="light" <?=($profile['theme']??'')==='light'?'selected':''?>>Light</option>
-            </select>
-            <label>Font</label>
-            <select name="font_family">
-              <option <?=($profile['font_family']??'')==='system-ui'?'selected':''?> value="system-ui">System</option>
-              <option <?=($profile['font_family']??'')==='Inter'?'selected':''?> value="Inter">Inter</option>
-              <option <?=($profile['font_family']??'')==='Poppins'?'selected':''?> value="Poppins">Poppins</option>
-            </select>
-          </div>
-          <div>
-            <label>Avatar</label>
-            <input type="file" name="avatar" accept="image/*">
-            <?php if (!empty($profile['avatar'])): ?>
-              <div class="avatar-preview">
-                <img src="<?=htmlspecialchars($profile['avatar'])?>" alt="Avatar">
-              </div>
-            <?php endif; ?>
-          </div>
-        </div>
+      <h3>👤 Basic Information</h3>
+      <p style="color: #64748b; margin-bottom: 24px;">Your display name and bio</p>
+      
+      <form action="/dashboard/save_profile.php" method="post">
+        <label>Display Name</label>
+        <input name="display_name" value="<?=htmlspecialchars($profile['display_name']??'')?>" required placeholder="Your name or brand">
+        
+        <label>Bio</label>
+        <textarea name="bio" rows="5" placeholder="Tell people about yourself..."><?=htmlspecialchars($profile['bio']??'')?></textarea>
+        
         <div style="margin-top: 24px;">
           <button class="btn" type="submit">Save Profile</button>
         </div>
@@ -927,9 +907,9 @@ try {
   <div class="panel <?=$activeTab==='design'?'active':''?>" id="panel-design">
     <div class="card">
       <h3>🎨 Design Your Page</h3>
-      <p style="color: #64748b; margin-bottom: 24px;">Choose a template or customize every detail of your profile page</p>
+      <p style="color: #64748b; margin-bottom: 24px;">All visual customization in one place - templates, colors, backgrounds, and more!</p>
       
-      <form id="designForm" action="/dashboard/save_design.php" method="post">
+      <form id="designForm" action="/dashboard/save_design.php" method="post" enctype="multipart/form-data">
         <!-- Template Presets -->
         <div style="margin-bottom: 32px;">
           <label style="margin-top: 0;">Choose a Template</label>
@@ -985,9 +965,76 @@ try {
 
         <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 32px 0;">
 
-        <!-- Custom Design Settings -->
-        <h3 style="margin-bottom: 16px;">Custom Design Options</h3>
-        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Or customize your design manually (will override template)</p>
+        <!-- Profile Elements -->
+        <h3 style="margin-bottom: 16px;">👤 Profile Elements</h3>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Avatar, theme, and font settings</p>
+        
+        <div class="grid2">
+          <div>
+            <label>Avatar Image</label>
+            <input type="file" name="avatar" accept="image/*">
+            <?php if (!empty($profile['avatar'])): ?>
+              <div class="avatar-preview">
+                <img src="<?=htmlspecialchars($profile['avatar'])?>" alt="Avatar">
+              </div>
+            <?php endif; ?>
+          </div>
+          
+          <div>
+            <label>Theme</label>
+            <select name="theme">
+              <option value="dark" <?=($profile['theme']??'dark')==='dark'?'selected':''?>>🌙 Dark</option>
+              <option value="light" <?=($profile['theme']??'')==='light'?'selected':''?>>☀️ Light</option>
+            </select>
+            
+            <label style="margin-top: 16px;">Font Family</label>
+            <select name="font_family">
+              <option value="system-ui" <?=($profile['font_family']??'')==='system-ui'?'selected':''?>>System</option>
+              <option value="Inter" <?=($profile['font_family']??'Inter')==='Inter'?'selected':''?>>Inter (Default)</option>
+              <option value="Poppins" <?=($profile['font_family']??'')==='Poppins'?'selected':''?>>Poppins</option>
+            </select>
+    </div>
+  </div>
+
+        <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 32px 0;">
+
+        <!-- Background Settings -->
+        <h3 style="margin-bottom: 16px;">🖼️ Background</h3>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Choose a background color, gradient, or upload an image</p>
+        
+        <div class="grid3">
+          <div>
+            <label>Background Color</label>
+            <input type="color" name="bg_color" value="<?=htmlspecialchars($profile['bg_color']??'#0f172a')?>">
+          </div>
+          <div>
+            <label>Gradient Start</label>
+            <input type="color" name="gradient_start" value="<?=htmlspecialchars($profile['gradient_start']??'')?>">
+          </div>
+          <div>
+            <label>Gradient End</label>
+            <input type="color" name="gradient_end" value="<?=htmlspecialchars($profile['gradient_end']??'')?>">
+          </div>
+        </div>
+        
+        <div style="margin-top: 16px;">
+          <label>Background Image (overrides gradient)</label>
+          <input type="file" name="bg_image_upload" accept="image/*">
+        <?php if (!empty($profile['bg_image'])): ?>
+            <div class="bg-preview" style="margin-top: 12px;">
+              <img src="<?=htmlspecialchars($profile['bg_image'])?>" alt="Background" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
+            </div>
+        <?php endif; ?>
+          <small style="display: block; margin-top: 8px; color: #64748b;">
+            💡 Templates include backgrounds, but you can override with your own image or gradient
+          </small>
+        </div>
+
+        <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 32px 0;">
+
+        <!-- Button & Link Styles -->
+        <h3 style="margin-bottom: 16px;">🎨 Buttons & Links</h3>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Customize button styles, colors, and layout</p>
         
         <div class="grid2">
           <div>
@@ -1057,38 +1104,6 @@ try {
     </div>
   </div>
 
-  <!-- Background -->
-  <div class="panel <?=$activeTab==='background'?'active':''?>" id="panel-background">
-    <div class="card">
-      <form action="/dashboard/save_background.php" method="post" enctype="multipart/form-data">
-        <div class="grid3">
-          <div>
-            <label>Background color</label>
-            <input type="color" name="bg_color" value="<?=htmlspecialchars($profile['bg_color']??'#0f172a')?>">
-          </div>
-          <div>
-            <label>Gradient (start)</label>
-            <input type="color" name="gradient_start" value="<?=htmlspecialchars($profile['gradient_start']??'')?>">
-          </div>
-          <div>
-            <label>Gradient (end)</label>
-            <input type="color" name="gradient_end" value="<?=htmlspecialchars($profile['gradient_end']??'')?>">
-          </div>
-        </div>
-        <label>Background image</label>
-        <input type="file" name="bg_image" accept="image/*">
-        <?php if (!empty($profile['bg_image'])): ?>
-          <div class="bg-preview">
-            <img src="<?=htmlspecialchars($profile['bg_image'])?>" alt="Background">
-          </div>
-        <?php endif; ?>
-        <div style="margin-top: 24px;">
-          <button class="btn" type="submit">Save Background</button>
-        </div>
-        <small>Tip: set gradient OR image; image wins if both are set.</small>
-      </form>
-    </div>
-  </div>
 
   <!-- Social Icons -->
   <div class="panel <?=$activeTab==='socials'?'active':''?>" id="panel-socials">
@@ -1136,25 +1151,25 @@ try {
           <div class="item" data-id="<?=$l['id']?>">
             <div class="row" style="justify-content: space-between; width: 100%;">
               <div class="row" style="gap: 12px;">
-                <span class="handle">☰</span>
+              <span class="handle">☰</span>
                 <div>
                   <div style="font-weight: 600; margin-bottom: 4px;"><?=htmlspecialchars($l['title'])?></div>
                   <a href="<?=htmlspecialchars($l['url'])?>" target="_blank" style="font-size: 13px; color: #64748b; text-decoration: none; display: block; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?=htmlspecialchars($l['url'])?></a>
                   <?php if (isset($l['click_count']) && $l['click_count'] > 0): ?>
                     <small style="color: #10b981; margin-top: 4px; font-size: 12px;">📊 <?=$l['click_count']?> <?=$l['click_count']==1?'click':'clicks'?></small>
                   <?php endif; ?>
-                </div>
+            </div>
               </div>
               <div class="row" style="gap: 8px;">
                 <form method="post" action="/dashboard/toggle_link.php" style="margin: 0;">
-                  <input type="hidden" name="id" value="<?=$l['id']?>">
-                  <input type="hidden" name="state" value="<?=$l['is_active']?0:1?>">
+                <input type="hidden" name="id" value="<?=$l['id']?>">
+                <input type="hidden" name="state" value="<?=$l['is_active']?0:1?>">
                   <button class="btn btn-secondary" type="submit"><?=$l['is_active']?'Hide':'Show'?></button>
                 </form>
                 <form method="post" action="/dashboard/delete_link.php" style="margin: 0;" onsubmit="return confirm('Are you sure you want to delete this link?');">
                   <input type="hidden" name="id" value="<?=$l['id']?>">
                   <button class="btn-delete" type="submit">Delete</button>
-                </form>
+              </form>
               </div>
             </div>
           </div>
@@ -1334,12 +1349,12 @@ try {
     btn.disabled = true;
     
     try {
-      const order = Array.from(linksList.children).map(x=>x.dataset.id);
-      const res = await fetch('/dashboard/reorder_links.php', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({order})
-      });
+    const order = Array.from(linksList.children).map(x=>x.dataset.id);
+    const res = await fetch('/dashboard/reorder_links.php', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({order})
+    });
       
       const data = await res.json();
       if (data.success) {
@@ -1394,28 +1409,6 @@ try {
           popover: {
             title: 'Profile Settings',
             description: 'Here you can set your display name, write a bio, upload an avatar, choose between dark/light themes, and select your preferred font.',
-            side: "top",
-            align: 'start'
-          }
-        },
-        {
-          element: '[data-tab="background"]',
-          popover: {
-            title: '🎨 Background Customization',
-            description: 'Make your page unique! Choose a solid color, gradient, or upload a custom background image.',
-            side: "bottom",
-            align: 'start',
-            onNextClick: () => {
-              document.querySelector('[data-tab="background"]').click();
-              driverObj.moveNext();
-            }
-          }
-        },
-        {
-          element: '#panel-background',
-          popover: {
-            title: 'Background Options',
-            description: 'Pick a background color, create a beautiful gradient, or upload an image. Pro tip: background images override gradients!',
             side: "top",
             align: 'start'
           }

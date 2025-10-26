@@ -87,11 +87,13 @@ Should see:
 
 ## 📚 More Info?
 
-- `DASHBOARD_TEMPLATES_ADDED.md` - **NEW!** Template changing in dashboard
+- `ALL_DESIGN_IN_ONE_PLACE.md` - **NEW!** All design settings consolidated ⭐
+- `BACKGROUND_IMAGES_ADDED.md` - Beautiful Unsplash backgrounds 🖼️
+- `DASHBOARD_TEMPLATES_ADDED.md` - Template changing in dashboard
+- `COMPLETE_SYSTEM.md` - Everything summary
 - `FIXES_APPLIED.md` - What was fixed
 - `RUN_MIGRATION.md` - Detailed instructions
 - `test_templates.php` - Diagnostic tool
-- `TEMPLATE_SYSTEM.md` - Full template docs
 
 ---
 
@@ -100,6 +102,8 @@ Should see:
 ✅ **Wizard Templates** - Choose design during signup  
 ✅ **Dashboard Templates** - Change design anytime  
 ✅ **10 Beautiful Templates** - Industry-specific  
+✅ **Background Images** - Stunning Unsplash backgrounds 🖼️  
+✅ **All Design in ONE Place** - Design tab has everything! ⭐ NEW!  
 ✅ **Instant Apply** - One-click design change  
 ✅ **Animated UI** - Professional polish  
 ✅ **Error Handling** - Works even if migration not run  
