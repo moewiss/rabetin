@@ -21,9 +21,14 @@ try {
   // Get template settings if a template was selected
   $template = null;
   if ($template_preset) {
-    $stmt = $pdo->prepare('SELECT * FROM design_templates WHERE slug = ?');
-    $stmt->execute([$template_preset]);
-    $template = $stmt->fetch();
+    try {
+      $stmt = $pdo->prepare('SELECT * FROM design_templates WHERE slug = ?');
+      $stmt->execute([$template_preset]);
+      $template = $stmt->fetch();
+    } catch (Exception $e) {
+      // If templates table doesn't exist yet, continue without template
+      $template = null;
+    }
   }
   
   // Handle avatar upload

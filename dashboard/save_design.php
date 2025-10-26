@@ -52,9 +52,14 @@ if (!empty($errors)) {
 try {
   // Apply template preset if selected
   if ($template_preset !== 'custom' && $template_preset !== 'default') {
-    $stmt = $pdo->prepare('SELECT * FROM design_templates WHERE slug = ?');
-    $stmt->execute([$template_preset]);
-    $template = $stmt->fetch();
+    try {
+      $stmt = $pdo->prepare('SELECT * FROM design_templates WHERE slug = ?');
+      $stmt->execute([$template_preset]);
+      $template = $stmt->fetch();
+    } catch (Exception $e) {
+      // If templates table doesn't exist, fall back to custom settings
+      $template = null;
+    }
     
     if ($template) {
       // Apply template settings to profile

@@ -28,8 +28,13 @@ $platforms = ['facebook','instagram','x','tiktok','youtube','email','linkedin','
 $socialMap = [];
 foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
 
-// Fetch design templates
-$templates = $pdo->query('SELECT * FROM design_templates ORDER BY id ASC')->fetchAll();
+// Fetch design templates with error handling
+try {
+  $templates = $pdo->query('SELECT * FROM design_templates ORDER BY id ASC')->fetchAll();
+} catch (Exception $e) {
+  // If table doesn't exist yet, use empty array
+  $templates = [];
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -815,6 +820,22 @@ $templates = $pdo->query('SELECT * FROM design_templates ORDER BY id ASC')->fetc
         height: 14px;
       }
     }
+    
+    /* Apply Template Button Animation */
+    @keyframes bounce {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+    
+    #applyTemplateBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+      transition: all 0.2s ease;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
@@ -908,30 +929,58 @@ $templates = $pdo->query('SELECT * FROM design_templates ORDER BY id ASC')->fetc
       <h3>🎨 Design Your Page</h3>
       <p style="color: #64748b; margin-bottom: 24px;">Choose a template or customize every detail of your profile page</p>
       
-      <form action="/dashboard/save_design.php" method="post">
+      <form id="designForm" action="/dashboard/save_design.php" method="post">
         <!-- Template Presets -->
         <div style="margin-bottom: 32px;">
           <label style="margin-top: 0;">Choose a Template</label>
+          <p style="color: #64748b; font-size: 13px; margin: 8px 0 16px 0;">
+            Click any template to instantly apply its design to your profile ✨
+          </p>
           <div class="dashboard-template-grid">
-            <?php foreach ($templates as $tpl): ?>
-              <div class="dashboard-template-card <?=($profile['template_preset']??'creator')===$tpl['slug']?'selected':''?>" 
-                   data-template="<?=htmlspecialchars($tpl['slug'])?>" 
-                   onclick="selectTemplate('<?=htmlspecialchars($tpl['slug'])?>')">
-                <div class="dashboard-template-preview" style="background: <?=htmlspecialchars($tpl['preview_gradient']??'linear-gradient(135deg, #667eea, #764ba2)')?>;">
-                  <div class="dashboard-template-buttons">
-                    <div class="dashboard-template-button" style="background: <?=htmlspecialchars($tpl['preview_accent']??$tpl['button_color'])?>"></div>
-                    <div class="dashboard-template-button" style="background: <?=htmlspecialchars($tpl['preview_accent']??$tpl['button_color'])?>"></div>
-                  </div>
-                </div>
-                <div class="dashboard-template-info">
-                  <div class="dashboard-template-name"><?=htmlspecialchars($tpl['name'])?></div>
-                  <div class="dashboard-template-category"><?=htmlspecialchars(ucfirst($tpl['category']??'general'))?></div>
-                </div>
-                <div class="dashboard-template-check">✓</div>
+            <?php if (empty($templates)): ?>
+              <div style="grid-column: 1/-1; background: #fef2f2; border: 2px solid #fca5a5; border-radius: 12px; padding: 24px; text-align: center;">
+                <div style="font-size: 32px; margin-bottom: 12px;">⚠️</div>
+                <h3 style="color: #dc2626; margin-bottom: 8px;">Templates Not Loaded</h3>
+                <p style="color: #991b1b; margin-bottom: 16px;">The templates table doesn't exist yet. Run the migration:</p>
+                <code style="background: #374151; color: #e5e7eb; padding: 8px 16px; border-radius: 8px; display: inline-block; font-family: monospace; font-size: 13px;">
+                  mysql -u rabetin -pMoody-006M rabetin &lt; design_system_migration.sql
+                </code>
+                <p style="color: #991b1b; margin-top: 16px; font-size: 14px;">
+                  Or visit <a href="/test_templates.php" style="color: #2563eb; text-decoration: underline;" target="_blank">test_templates.php</a> for help
+                </p>
               </div>
-            <?php endforeach; ?>
+            <?php else: ?>
+              <?php foreach ($templates as $tpl): ?>
+                <div class="dashboard-template-card <?=($profile['template_preset']??'creator')===$tpl['slug']?'selected':''?>" 
+                     data-template="<?=htmlspecialchars($tpl['slug'])?>" 
+                     onclick="selectTemplate('<?=htmlspecialchars($tpl['slug'])?>')">
+                  <div class="dashboard-template-preview" style="background: <?=htmlspecialchars($tpl['preview_gradient']??'linear-gradient(135deg, #667eea, #764ba2)')?>;">
+                    <div class="dashboard-template-buttons">
+                      <div class="dashboard-template-button" style="background: <?=htmlspecialchars($tpl['preview_accent']??$tpl['button_color'])?>"></div>
+                      <div class="dashboard-template-button" style="background: <?=htmlspecialchars($tpl['preview_accent']??$tpl['button_color'])?>"></div>
+                    </div>
+                  </div>
+                  <div class="dashboard-template-info">
+                    <div class="dashboard-template-name"><?=htmlspecialchars($tpl['name'])?></div>
+                    <div class="dashboard-template-category"><?=htmlspecialchars(ucfirst($tpl['category']??'general'))?></div>
+                  </div>
+                  <div class="dashboard-template-check">✓</div>
+                </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </div>
           <input type="hidden" name="template_preset" id="templatePreset" value="<?=htmlspecialchars($profile['template_preset']??'default')?>">
+          
+          <!-- Quick Apply Template Button -->
+          <?php if (!empty($templates)): ?>
+            <div style="margin-top: 16px; text-align: center;">
+              <button type="button" id="applyTemplateBtn" onclick="applyTemplate()" 
+                      class="btn" 
+                      style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 32px; font-weight: 600; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                ✨ Apply Template
+              </button>
+            </div>
+          <?php endif; ?>
         </div>
 
         <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 32px 0;">
@@ -1202,15 +1251,40 @@ $templates = $pdo->query('SELECT * FROM design_templates ORDER BY id ASC')->fetc
     });
   });
   
-  // Template Selection
+  // Template Selection with instant feedback
   function selectTemplate(slug) {
     document.getElementById('templatePreset').value = slug;
+    
+    let selectedCard = null;
     document.querySelectorAll('.dashboard-template-card').forEach(card => {
       card.classList.remove('selected');
       if (card.dataset.template === slug) {
         card.classList.add('selected');
+        selectedCard = card;
       }
     });
+    
+    // Show "Apply Template" button with template name
+    const applyBtn = document.getElementById('applyTemplateBtn');
+    if (applyBtn && selectedCard) {
+      const templateName = selectedCard.querySelector('.dashboard-template-name').textContent;
+      applyBtn.style.display = 'inline-flex';
+      applyBtn.innerHTML = '✨ Apply ' + templateName + ' Template';
+      
+      // Add bounce animation
+      applyBtn.style.animation = 'none';
+      setTimeout(() => {
+        applyBtn.style.animation = 'bounce 0.5s ease';
+      }, 10);
+    }
+  }
+  
+  // Quick apply template function
+  function applyTemplate() {
+    const form = document.querySelector('#designForm');
+    if (form) {
+      form.submit();
+    }
   }
   
   // Tabs with URL updates

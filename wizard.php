@@ -20,8 +20,13 @@ $profile = $pdo->prepare('SELECT * FROM profiles WHERE user_id=?');
 $profile->execute([$user_id]);
 $profile = $profile->fetch();
 
-// Fetch design templates
-$templates = $pdo->query('SELECT * FROM design_templates ORDER BY category, id ASC')->fetchAll();
+// Fetch design templates with error handling
+try {
+  $templates = $pdo->query('SELECT * FROM design_templates ORDER BY category, id ASC')->fetchAll();
+} catch (Exception $e) {
+  // If table doesn't exist yet, use empty array
+  $templates = [];
+}
 ?>
 <!doctype html>
 <html>
@@ -461,21 +466,28 @@ $templates = $pdo->query('SELECT * FROM design_templates ORDER BY category, id A
           <input type="hidden" name="template_preset" id="templatePreset" value="creator">
           
           <div class="template-grid">
-            <?php foreach ($templates as $tpl): ?>
-              <div class="template-card" data-template="<?=htmlspecialchars($tpl['slug'])?>" onclick="selectWizardTemplate('<?=htmlspecialchars($tpl['slug'])?>')">
-                <div class="template-preview" style="background: <?=htmlspecialchars($tpl['preview_gradient'])?>;">
-                  <div class="template-buttons">
-                    <div class="template-button" style="background: <?=htmlspecialchars($tpl['preview_accent'])?>"></div>
-                    <div class="template-button" style="background: <?=htmlspecialchars($tpl['preview_accent'])?>"></div>
-                  </div>
-                </div>
-                <div class="template-info">
-                  <div class="template-name"><?=htmlspecialchars($tpl['name'])?></div>
-                  <div class="template-category"><?=htmlspecialchars(ucfirst($tpl['category']))?></div>
-                </div>
-                <div class="template-check">✓</div>
+            <?php if (empty($templates)): ?>
+              <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #9ca3af;">
+                <p style="font-size: 18px; margin-bottom: 8px;">⚠️ Templates not loaded</p>
+                <p style="font-size: 14px;">Run: <code style="background: #374151; padding: 4px 8px; border-radius: 4px;">mysql -u rabetin -pMoody-006M rabetin &lt; design_system_migration.sql</code></p>
               </div>
-            <?php endforeach; ?>
+            <?php else: ?>
+              <?php foreach ($templates as $tpl): ?>
+                <div class="template-card" data-template="<?=htmlspecialchars($tpl['slug'])?>" onclick="selectWizardTemplate('<?=htmlspecialchars($tpl['slug'])?>')">
+                  <div class="template-preview" style="background: <?=htmlspecialchars($tpl['preview_gradient'])?>;">
+                    <div class="template-buttons">
+                      <div class="template-button" style="background: <?=htmlspecialchars($tpl['preview_accent'])?>"></div>
+                      <div class="template-button" style="background: <?=htmlspecialchars($tpl['preview_accent'])?>"></div>
+                    </div>
+                  </div>
+                  <div class="template-info">
+                    <div class="template-name"><?=htmlspecialchars($tpl['name'])?></div>
+                    <div class="template-category"><?=htmlspecialchars(ucfirst($tpl['category']))?></div>
+                  </div>
+                  <div class="template-check">✓</div>
+                </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </div>
           
           <div class="button-group">
@@ -613,6 +625,12 @@ $templates = $pdo->query('SELECT * FROM design_templates ORDER BY category, id A
       if (firstCard) {
         firstCard.classList.add('selected');
       }
+    });
+    
+    // Form submission handling
+    document.getElementById('wizardForm').addEventListener('submit', function(e) {
+      console.log('Form submitting...');
+      // Let the form submit normally
     });
   </script>
 </body>
