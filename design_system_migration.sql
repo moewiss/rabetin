@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS design_templates (
   name VARCHAR(100) NOT NULL,
   slug VARCHAR(50) NOT NULL UNIQUE,
   description TEXT,
-  preview_image VARCHAR(255),
+  category VARCHAR(50) DEFAULT 'general',
+  preview_gradient VARCHAR(255),
+  preview_accent VARCHAR(7),
   theme VARCHAR(10) DEFAULT 'dark',
   button_style VARCHAR(20) DEFAULT 'rounded',
   button_color VARCHAR(7) DEFAULT '#667eea',
@@ -31,20 +33,21 @@ CREATE TABLE IF NOT EXISTS design_templates (
   font_family VARCHAR(50) DEFAULT 'Inter',
   is_premium BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_slug (slug)
+  INDEX idx_slug (slug),
+  INDEX idx_category (category)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert preset templates
-INSERT INTO design_templates (name, slug, description, theme, button_style, button_color, button_text_color, button_shadow, link_layout, card_style, bg_color, gradient_start, gradient_end, text_color, font_family) VALUES
-('Default', 'default', 'Clean and professional with purple gradient', 'dark', 'rounded', '#667eea', '#ffffff', TRUE, 'standard', 'glass', '#0f172a', '#667eea', '#764ba2', '#e2e8f0', 'Inter'),
-('Minimal', 'minimal', 'Simple and elegant minimalist design', 'light', 'rounded', '#1e293b', '#ffffff', FALSE, 'standard', 'flat', '#ffffff', NULL, NULL, '#1e293b', 'Inter'),
-('Bold', 'bold', 'High contrast with vibrant colors', 'dark', 'sharp', '#ef4444', '#ffffff', TRUE, 'full', 'solid', '#0a0a0a', NULL, NULL, '#ffffff', 'Poppins'),
-('Pastel', 'pastel', 'Soft and warm pastel gradient', 'light', 'rounded', '#f472b6', '#ffffff', TRUE, 'standard', 'glass', '#fef3c7', '#fde68a', '#fbbf24', '#92400e', 'Poppins'),
-('Ocean', 'ocean', 'Cool blue gradient like the ocean', 'dark', 'rounded', '#0ea5e9', '#ffffff', TRUE, 'standard', 'glass', '#0c4a6e', '#0369a1', '#06b6d4', '#e0f2fe', 'Inter'),
-('Sunset', 'sunset', 'Warm orange and pink gradient', 'dark', 'rounded', '#f97316', '#ffffff', TRUE, 'standard', 'glass', '#7c2d12', '#ea580c', '#ec4899', '#fef2f2', 'Poppins'),
-('Neon', 'neon', 'Vibrant neon cyberpunk style', 'dark', 'sharp', '#a855f7', '#000000', TRUE, 'full', 'neon', '#0a0a0a', '#7c3aed', '#ec4899', '#fbbf24', 'Inter'),
-('Professional', 'professional', 'Corporate and business-ready', 'light', 'sharp', '#2563eb', '#ffffff', TRUE, 'standard', 'card', '#f8fafc', NULL, NULL, '#1e293b', 'Inter'),
-('Nature', 'nature', 'Fresh green gradient inspired by nature', 'light', 'rounded', '#22c55e', '#ffffff', TRUE, 'standard', 'glass', '#f0fdf4', '#34d399', '#10b981', '#064e3b', 'Poppins'),
-('Monochrome', 'monochrome', 'Classic black and white', 'light', 'sharp', '#000000', '#ffffff', FALSE, 'standard', 'flat', '#ffffff', NULL, NULL, '#000000', 'Inter')
+-- Insert industry-specific preset templates
+INSERT INTO design_templates (name, slug, description, category, preview_gradient, preview_accent, theme, button_style, button_color, button_text_color, button_shadow, link_layout, card_style, bg_color, gradient_start, gradient_end, text_color, font_family) VALUES
+('Creator', 'creator', 'Perfect for bloggers and content creators', 'blogger', 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', '#667eea', 'dark', 'rounded', '#667eea', '#ffffff', TRUE, 'standard', 'glass', '#0f172a', '#667eea', '#764ba2', '#e2e8f0', 'Inter'),
+('TechPro', 'techpro', 'Modern design for developers and tech professionals', 'tech', 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)', '#00d4ff', 'dark', 'sharp', '#00d4ff', '#000000', TRUE, 'full', 'neon', '#0a0f1c', '#00f2fe', '#4facfe', '#e0f7ff', 'Inter'),
+('Engineer', 'engineer', 'Industrial and professional for engineers', 'engineering', 'linear-gradient(135deg, #f5af19 0%, #f12711 100%)', '#ff6b35', 'dark', 'sharp', '#ff6b35', '#ffffff', TRUE, 'standard', 'solid', '#1a1a1a', '#f5af19', '#f12711', '#ffffff', 'Inter'),
+('Artist', 'artist', 'Vibrant and creative for artists and designers', 'creative', 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)', '#ff6ba9', 'light', 'pill', '#ff6ba9', '#ffffff', TRUE, 'standard', 'glass', '#fff5f7', '#fa709a', '#fee140', '#4a0e4e', 'Poppins'),
+('Business', 'business', 'Professional corporate design', 'business', 'linear-gradient(135deg, #2b5876 0%, #4e4376 100%)', '#2563eb', 'light', 'sharp', '#2563eb', '#ffffff', TRUE, 'standard', 'card', '#f8fafc', '#2b5876', '#4e4376', '#1e293b', 'Inter'),
+('Fitness', 'fitness', 'Energetic design for fitness and health', 'fitness', 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', '#e84545', 'dark', 'rounded', '#e84545', '#ffffff', TRUE, 'full', 'glass', '#1a0a0f', '#f093fb', '#f5576c', '#ffe9e9', 'Poppins'),
+('Musician', 'musician', 'Bold design for musicians and entertainers', 'music', 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)', '#8b5cf6', 'light', 'pill', '#8b5cf6', '#ffffff', TRUE, 'standard', 'glass', '#fef3f7', '#a8edea', '#fed6e3', '#2d1b69', 'Poppins'),
+('Fashion', 'fashion', 'Elegant design for fashion and beauty', 'fashion', 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)', '#ec4899', 'light', 'rounded', '#ec4899', '#ffffff', TRUE, 'compact', 'flat', '#fff7ed', '#ffecd2', '#fcb69f', '#831843', 'Poppins'),
+('Foodie', 'foodie', 'Warm design for food and restaurants', 'food', 'linear-gradient(135deg, #ff9a56 0%, #ff6a00 100%)', '#f97316', 'dark', 'rounded', '#f97316', '#ffffff', TRUE, 'standard', 'glass', '#1c0a00', '#ff9a56', '#ff6a00', '#ffe8d6', 'Poppins'),
+('Educator', 'educator', 'Clean design for teachers and education', 'education', 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)', '#22c55e', 'light', 'rounded', '#22c55e', '#ffffff', TRUE, 'standard', 'card', '#f0fdf4', '#84fab0', '#8fd3f4', '#064e3b', 'Inter')
 ON DUPLICATE KEY UPDATE name=VALUES(name);
 

@@ -684,6 +684,137 @@ $templates = $pdo->query('SELECT * FROM design_templates ORDER BY id ASC')->fetc
         justify-content: center;
       }
     }
+    
+    /* Dashboard Template Grid Styles */
+    .dashboard-template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+    
+    .dashboard-template-card {
+      cursor: pointer;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: 3px solid #e2e8f0;
+      position: relative;
+      background: #ffffff;
+    }
+    
+    .dashboard-template-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+      border-color: #cbd5e1;
+    }
+    
+    .dashboard-template-card.selected {
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+    }
+    
+    .dashboard-template-preview {
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+    
+    .dashboard-template-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+    
+    .dashboard-template-button {
+      height: 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      animation: dashboardPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes dashboardPulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.85;
+        transform: scale(0.98);
+      }
+    }
+    
+    .dashboard-template-info {
+      padding: 14px;
+      text-align: center;
+      background: #ffffff;
+    }
+    
+    .dashboard-template-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+    
+    .dashboard-template-category {
+      font-size: 12px;
+      color: #64748b;
+      text-transform: capitalize;
+    }
+    
+    .dashboard-template-check {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #10b981;
+      color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    .dashboard-template-card.selected .dashboard-template-check {
+      display: flex;
+      animation: dashboardCheckPop 0.3s ease;
+    }
+    
+    @keyframes dashboardCheckPop {
+      0% {
+        transform: scale(0);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    
+    @media (max-width: 1024px) {
+      .dashboard-template-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+      }
+      
+      .dashboard-template-preview {
+        height: 110px;
+      }
+      
+      .dashboard-template-button {
+        height: 14px;
+      }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/>
@@ -781,26 +912,22 @@ $templates = $pdo->query('SELECT * FROM design_templates ORDER BY id ASC')->fetc
         <!-- Template Presets -->
         <div style="margin-bottom: 32px;">
           <label style="margin-top: 0;">Choose a Template</label>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 12px;">
+          <div class="dashboard-template-grid">
             <?php foreach ($templates as $tpl): ?>
-              <div class="template-card" data-template="<?=htmlspecialchars($tpl['slug'])?>" 
-                   onclick="selectTemplate('<?=htmlspecialchars($tpl['slug'])?>')"
-                   style="cursor: pointer; padding: 16px; border-radius: 12px; border: 3px solid <?=($profile['template_preset']??'default')===$tpl['slug']?'#667eea':'#e2e8f0'?>; background: <?=htmlspecialchars($tpl['bg_color']??'#ffffff')?>; transition: all 0.2s ease; position: relative;">
-                <div style="text-align: center;">
-                  <div style="font-weight: 600; color: <?=htmlspecialchars($tpl['text_color']??'#1e293b')?>; margin-bottom: 4px;">
-                    <?=htmlspecialchars($tpl['name'])?>
+              <div class="dashboard-template-card <?=($profile['template_preset']??'creator')===$tpl['slug']?'selected':''?>" 
+                   data-template="<?=htmlspecialchars($tpl['slug'])?>" 
+                   onclick="selectTemplate('<?=htmlspecialchars($tpl['slug'])?>')">
+                <div class="dashboard-template-preview" style="background: <?=htmlspecialchars($tpl['preview_gradient']??'linear-gradient(135deg, #667eea, #764ba2)')?>;">
+                  <div class="dashboard-template-buttons">
+                    <div class="dashboard-template-button" style="background: <?=htmlspecialchars($tpl['preview_accent']??$tpl['button_color'])?>"></div>
+                    <div class="dashboard-template-button" style="background: <?=htmlspecialchars($tpl['preview_accent']??$tpl['button_color'])?>"></div>
                   </div>
-                  <div style="font-size: 12px; color: <?=htmlspecialchars($tpl['text_color']??'#64748b')?>; opacity: 0.7; margin-bottom: 12px;">
-                    <?=htmlspecialchars($tpl['description'])?>
-                  </div>
-                  <div style="height: 60px; display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center;">
-                    <div style="width: 80%; height: 10px; background: <?=htmlspecialchars($tpl['button_color'])?>; border-radius: <?=$tpl['button_style']==='rounded'?'8px':($tpl['button_style']==='pill'?'999px':'4px')?>; box-shadow: <?=$tpl['button_shadow']?'0 4px 12px rgba(0,0,0,0.15)':'none'?>;"></div>
-                    <div style="width: 80%; height: 10px; background: <?=htmlspecialchars($tpl['button_color'])?>; border-radius: <?=$tpl['button_style']==='rounded'?'8px':($tpl['button_style']==='pill'?'999px':'4px')?>; box-shadow: <?=$tpl['button_shadow']?'0 4px 12px rgba(0,0,0,0.15)':'none'?>;"></div>
-                  </div>
-                  <?php if(($profile['template_preset']??'default')===$tpl['slug']): ?>
-                    <div style="position: absolute; top: 8px; right: 8px; background: #10b981; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">✓</div>
-                  <?php endif; ?>
                 </div>
+                <div class="dashboard-template-info">
+                  <div class="dashboard-template-name"><?=htmlspecialchars($tpl['name'])?></div>
+                  <div class="dashboard-template-category"><?=htmlspecialchars(ucfirst($tpl['category']??'general'))?></div>
+                </div>
+                <div class="dashboard-template-check">✓</div>
               </div>
             <?php endforeach; ?>
           </div>
@@ -1078,11 +1205,10 @@ $templates = $pdo->query('SELECT * FROM design_templates ORDER BY id ASC')->fetc
   // Template Selection
   function selectTemplate(slug) {
     document.getElementById('templatePreset').value = slug;
-    document.querySelectorAll('.template-card').forEach(card => {
+    document.querySelectorAll('.dashboard-template-card').forEach(card => {
+      card.classList.remove('selected');
       if (card.dataset.template === slug) {
-        card.style.borderColor = '#667eea';
-      } else {
-        card.style.borderColor = '#e2e8f0';
+        card.classList.add('selected');
       }
     });
   }

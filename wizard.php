@@ -19,6 +19,9 @@ if ($user && $user['wizard_completed']) {
 $profile = $pdo->prepare('SELECT * FROM profiles WHERE user_id=?');
 $profile->execute([$user_id]);
 $profile = $profile->fetch();
+
+// Fetch design templates
+$templates = $pdo->query('SELECT * FROM design_templates ORDER BY category, id ASC')->fetchAll();
 ?>
 <!doctype html>
 <html>
@@ -233,6 +236,157 @@ $profile = $profile->fetch();
       margin: 0 0 8px 0;
       color: #667eea;
     }
+    
+    /* Template Grid Styles */
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    
+    .template-card {
+      cursor: pointer;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      border: 3px solid transparent;
+      position: relative;
+      background: #0b1220;
+    }
+    
+    .template-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+    }
+    
+    .template-card.selected {
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+    }
+    
+    .template-preview {
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+    }
+    
+    .template-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+    
+    .template-button {
+      height: 14px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(0.98);
+      }
+    }
+    
+    .template-info {
+      padding: 12px;
+      text-align: center;
+    }
+    
+    .template-name {
+      font-weight: 600;
+      font-size: 14px;
+      color: #f9fafb;
+      margin-bottom: 4px;
+    }
+    
+    .template-category {
+      font-size: 11px;
+      color: #9ca3af;
+      text-transform: capitalize;
+    }
+    
+    .template-check {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #10b981;
+      color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+    
+    .template-card.selected .template-check {
+      display: flex;
+      animation: checkPop 0.3s ease;
+    }
+    
+    @keyframes checkPop {
+      0% {
+        transform: scale(0);
+      }
+      50% {
+        transform: scale(1.2);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    
+    .template-grid::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .template-grid::-webkit-scrollbar-track {
+      background: #0b1220;
+      border-radius: 4px;
+    }
+    
+    .template-grid::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 4px;
+    }
+    
+    .template-grid::-webkit-scrollbar-thumb:hover {
+      background: #4b5563;
+    }
+    
+    @media (max-width: 640px) {
+      .template-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 12px;
+        max-height: 350px;
+      }
+      
+      .template-preview {
+        height: 100px;
+      }
+      
+      .template-button {
+        height: 12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -299,8 +453,39 @@ $profile = $profile->fetch();
           </div>
         </div>
 
-        <!-- Step 3: Add First Link -->
+        <!-- Step 3: Choose Template -->
         <div class="step" data-step="3">
+          <h2>✨ Choose your style</h2>
+          <p>Pick a template that matches your vibe. You can customize everything later!</p>
+          
+          <input type="hidden" name="template_preset" id="templatePreset" value="creator">
+          
+          <div class="template-grid">
+            <?php foreach ($templates as $tpl): ?>
+              <div class="template-card" data-template="<?=htmlspecialchars($tpl['slug'])?>" onclick="selectWizardTemplate('<?=htmlspecialchars($tpl['slug'])?>')">
+                <div class="template-preview" style="background: <?=htmlspecialchars($tpl['preview_gradient'])?>;">
+                  <div class="template-buttons">
+                    <div class="template-button" style="background: <?=htmlspecialchars($tpl['preview_accent'])?>"></div>
+                    <div class="template-button" style="background: <?=htmlspecialchars($tpl['preview_accent'])?>"></div>
+                  </div>
+                </div>
+                <div class="template-info">
+                  <div class="template-name"><?=htmlspecialchars($tpl['name'])?></div>
+                  <div class="template-category"><?=htmlspecialchars(ucfirst($tpl['category']))?></div>
+                </div>
+                <div class="template-check">✓</div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+          
+          <div class="button-group">
+            <button type="button" class="btn-secondary" onclick="prevStep()">← Back</button>
+            <button type="button" class="btn-primary" onclick="nextStep()">Next →</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Add First Link -->
+        <div class="step" data-step="4">
           <h2>🔗 Add your first link</h2>
           <p>Share your most important link - portfolio, store, social profile, or anything else!</p>
           
@@ -324,8 +509,8 @@ $profile = $profile->fetch();
           </div>
         </div>
 
-        <!-- Step 4: Complete -->
-        <div class="step" data-step="4">
+        <!-- Step 5: Complete -->
+        <div class="step" data-step="5">
           <div class="success-icon">🚀</div>
           <h2 style="text-align:center">All set!</h2>
           <p style="text-align:center">Your profile is ready. Click below to go to your dashboard and explore all the features.</p>
@@ -353,7 +538,7 @@ $profile = $profile->fetch();
 
   <script>
     let currentStep = 1;
-    const totalSteps = 4;
+    const totalSteps = 5;
 
     function updateProgress() {
       const progress = (currentStep / totalSteps) * 100;
@@ -412,6 +597,23 @@ $profile = $profile->fetch();
 
     // Initialize progress bar
     updateProgress();
+    
+    // Template selection
+    function selectWizardTemplate(slug) {
+      document.getElementById('templatePreset').value = slug;
+      document.querySelectorAll('.template-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      event.currentTarget.classList.add('selected');
+    }
+    
+    // Select first template by default
+    document.addEventListener('DOMContentLoaded', function() {
+      const firstCard = document.querySelector('.template-card');
+      if (firstCard) {
+        firstCard.classList.add('selected');
+      }
+    });
   </script>
 </body>
 </html>

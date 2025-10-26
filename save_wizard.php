@@ -12,9 +12,18 @@ try {
   $display_name = trim($_POST['display_name'] ?? '');
   $bio = trim($_POST['bio'] ?? '');
   $theme = $_POST['theme'] ?? 'dark';
+  $template_preset = $_POST['template_preset'] ?? 'creator';
   
   if (!$display_name) {
     throw new Exception('Display name is required');
+  }
+  
+  // Get template settings if a template was selected
+  $template = null;
+  if ($template_preset) {
+    $stmt = $pdo->prepare('SELECT * FROM design_templates WHERE slug = ?');
+    $stmt->execute([$template_preset]);
+    $template = $stmt->fetch();
   }
   
   // Handle avatar upload
@@ -38,13 +47,92 @@ try {
     }
   }
   
-  // Update profile
-  if ($avatar_path) {
-    $stmt = $pdo->prepare('UPDATE profiles SET display_name=?, bio=?, theme=?, avatar=? WHERE user_id=?');
-    $stmt->execute([$display_name, $bio, $theme, $avatar_path, $user_id]);
+  // Update profile with template settings if available
+  if ($template) {
+    // Apply template design
+    if ($avatar_path) {
+      $stmt = $pdo->prepare('
+        UPDATE profiles SET 
+          display_name=?, 
+          bio=?, 
+          theme=?, 
+          avatar=?,
+          template_preset=?,
+          button_style=?,
+          button_color=?,
+          button_text_color=?,
+          button_shadow=?,
+          link_layout=?,
+          card_style=?,
+          bg_color=?,
+          gradient_start=?,
+          gradient_end=?,
+          text_color=?,
+          font_family=?
+        WHERE user_id=?
+      ');
+      $stmt->execute([
+        $display_name, $bio, $template['theme'], $avatar_path,
+        $template_preset,
+        $template['button_style'],
+        $template['button_color'],
+        $template['button_text_color'],
+        $template['button_shadow'],
+        $template['link_layout'],
+        $template['card_style'],
+        $template['bg_color'],
+        $template['gradient_start'],
+        $template['gradient_end'],
+        $template['text_color'],
+        $template['font_family'],
+        $user_id
+      ]);
+    } else {
+      $stmt = $pdo->prepare('
+        UPDATE profiles SET 
+          display_name=?, 
+          bio=?, 
+          theme=?,
+          template_preset=?,
+          button_style=?,
+          button_color=?,
+          button_text_color=?,
+          button_shadow=?,
+          link_layout=?,
+          card_style=?,
+          bg_color=?,
+          gradient_start=?,
+          gradient_end=?,
+          text_color=?,
+          font_family=?
+        WHERE user_id=?
+      ');
+      $stmt->execute([
+        $display_name, $bio, $template['theme'],
+        $template_preset,
+        $template['button_style'],
+        $template['button_color'],
+        $template['button_text_color'],
+        $template['button_shadow'],
+        $template['link_layout'],
+        $template['card_style'],
+        $template['bg_color'],
+        $template['gradient_start'],
+        $template['gradient_end'],
+        $template['text_color'],
+        $template['font_family'],
+        $user_id
+      ]);
+    }
   } else {
-    $stmt = $pdo->prepare('UPDATE profiles SET display_name=?, bio=?, theme=? WHERE user_id=?');
-    $stmt->execute([$display_name, $bio, $theme, $user_id]);
+    // No template, just update basics
+    if ($avatar_path) {
+      $stmt = $pdo->prepare('UPDATE profiles SET display_name=?, bio=?, theme=?, avatar=? WHERE user_id=?');
+      $stmt->execute([$display_name, $bio, $theme, $avatar_path, $user_id]);
+    } else {
+      $stmt = $pdo->prepare('UPDATE profiles SET display_name=?, bio=?, theme=? WHERE user_id=?');
+      $stmt->execute([$display_name, $bio, $theme, $user_id]);
+    }
   }
   
   // Add first link if provided
