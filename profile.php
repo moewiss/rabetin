@@ -63,57 +63,326 @@ function icon_svg($p){
 }
 ?>
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title><?=htmlspecialchars($profile['display_name'])?> — Rabetin.bio</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root { color-scheme: <?= $theme==='dark'?'dark':'light' ?>; }
-    body{margin:0;font-family:<?=htmlspecialchars($font)?>; <?=$bgCss?>; color:<?= $theme==='dark'?'#e2e8f0':'#0b1220'?>}
-    .overlay{backdrop-filter:saturate(1.1) <?=!empty($profile['bg_image'])?'brightness(0.95)':''?>}
-    .wrap{max-width:560px;margin:0 auto;padding:28px;text-align:center;min-height:100vh}
-    .avatar{width:120px;height:120px;border-radius:999px;object-fit:cover;border:3px solid rgba(255,255,255,.2)}
-    .name{font-weight:800;font-size:28px;margin:16px 0 6px}
-    .bio{opacity:.9;margin-bottom:18px;white-space:pre-wrap}
-    .icons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:12px 0 18px}
-    .icon{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid rgba(255,255,255,.18);border-radius:10px;text-decoration:none}
-    .link{display:block;padding:14px 16px;margin:12px 0;border-radius:12px;text-decoration:none;border:1px solid rgba(0,0,0,.12);background:rgba(255,255,255,<?= $theme==='dark'?'0.04':'0.8'?>)}
-    .link:hover{transform:translateY(-1px)}
-    .embeds{margin-top:22px;display:grid;gap:16px}
-    .embed-card{padding:10px;border-radius:12px;background:rgba(0,0,0,0.06);border:1px solid rgba(0,0,0,0.1)}
-    iframe{width:100%;min-height:420px;border:0;border-radius:12px}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      color-scheme: <?= $theme==='dark'?'dark':'light' ?>;
+    }
+    
+    body {
+      font-family: <?=htmlspecialchars($font === 'system-ui' ? "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" : "'".$font."', 'Inter', sans-serif")?>;
+      <?=$bgCss?>;
+      color: <?= $theme==='dark'?'#e2e8f0':'#1e293b'?>;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      position: relative;
+    }
+    <?php if (!empty($profile['bg_image'])): ?>
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: <?= $theme==='dark'?'rgba(0, 0, 0, 0.45)':'rgba(255, 255, 255, 0.8)'?>;
+      backdrop-filter: blur(8px) saturate(120%);
+      z-index: 0;
+    }
+    <?php endif; ?>
+    
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+      text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .profile-header {
+      margin-bottom: 32px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid <?= $theme==='dark'?'rgba(255, 255, 255, 0.15)':'rgba(255, 255, 255, 0.9)'?>;
+      box-shadow: 0 8px 32px <?= $theme==='dark'?'rgba(0, 0, 0, 0.3)':'rgba(0, 0, 0, 0.12)'?>;
+      margin-bottom: 24px;
+      transition: transform 0.3s ease;
+    }
+    
+    .avatar:hover {
+      transform: scale(1.05);
+    }
+    
+    .name {
+      font-weight: 800;
+      font-size: 32px;
+      margin-bottom: 12px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      color: <?= $theme==='dark'?'#ffffff':'#0f172a'?>;
+    }
+    
+    .bio {
+      font-size: 16px;
+      line-height: 1.6;
+      color: <?= $theme==='dark'?'#cbd5e1':'#475569'?>;
+      white-space: pre-wrap;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    
+    .social-icons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin: 32px 0 40px;
+      animation: fadeInUp 0.6s ease-out 0.1s backwards;
+    }
+    
+    .social-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      background: <?= $theme==='dark'?'rgba(255, 255, 255, 0.08)':'rgba(255, 255, 255, 0.9)'?>;
+      border: 2px solid <?= $theme==='dark'?'rgba(255, 255, 255, 0.12)':'rgba(226, 232, 240, 0.8)'?>;
+      color: <?= $theme==='dark'?'#e2e8f0':'#475569'?>;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px <?= $theme==='dark'?'rgba(0, 0, 0, 0.2)':'rgba(0, 0, 0, 0.06)'?>;
+    }
+    
+    .social-icon:hover {
+      transform: translateY(-4px);
+      background: <?= $theme==='dark'?'rgba(255, 255, 255, 0.15)':'rgba(255, 255, 255, 1)'?>;
+      border-color: <?= $theme==='dark'?'rgba(255, 255, 255, 0.25)':'#cbd5e1'?>;
+      box-shadow: 0 8px 24px <?= $theme==='dark'?'rgba(0, 0, 0, 0.3)':'rgba(0, 0, 0, 0.12)'?>;
+    }
+    
+    .social-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .links-container {
+      width: 100%;
+      max-width: 560px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 24px;
+      border-radius: 14px;
+      background: <?= $theme==='dark'?'rgba(255, 255, 255, 0.08)':'rgba(255, 255, 255, 0.95)'?>;
+      border: 2px solid <?= $theme==='dark'?'rgba(255, 255, 255, 0.12)':'rgba(226, 232, 240, 0.8)'?>;
+      color: <?= $theme==='dark'?'#ffffff':'#1e293b'?>;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px <?= $theme==='dark'?'rgba(0, 0, 0, 0.2)':'rgba(0, 0, 0, 0.06)'?>;
+      animation: fadeInUp 0.5s ease-out backwards;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, <?= $theme==='dark'?'rgba(255, 255, 255, 0.1)':'rgba(102, 126, 234, 0.1)'?>, transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .link:hover::before {
+      left: 100%;
+    }
+    
+    .link:hover {
+      transform: translateY(-4px);
+      background: <?= $theme==='dark'?'rgba(255, 255, 255, 0.15)':'rgba(255, 255, 255, 1)'?>;
+      border-color: <?= $theme==='dark'?'rgba(255, 255, 255, 0.25)':'#667eea'?>;
+      box-shadow: 0 8px 24px <?= $theme==='dark'?'rgba(0, 0, 0, 0.3)':'rgba(102, 126, 234, 0.25)'?>;
+    }
+    
+    .link:active {
+      transform: translateY(-2px);
+    }
+    
+    <?php 
+    // Generate staggered animation delays for links
+    foreach ($links as $i => $l) {
+      $delay = 0.2 + ($i * 0.05);
+      echo ".link:nth-child(".($i+1).") { animation-delay: {$delay}s; }\n";
+    }
+    ?>
+    
+    .embeds {
+      width: 100%;
+      max-width: 560px;
+      margin-top: 48px;
+      display: grid;
+      gap: 24px;
+      animation: fadeInUp 0.6s ease-out 0.4s backwards;
+    }
+    
+    .embed-card {
+      padding: 16px;
+      border-radius: 16px;
+      background: <?= $theme==='dark'?'rgba(255, 255, 255, 0.08)':'rgba(255, 255, 255, 0.95)'?>;
+      border: 2px solid <?= $theme==='dark'?'rgba(255, 255, 255, 0.12)':'rgba(226, 232, 240, 0.8)'?>;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px <?= $theme==='dark'?'rgba(0, 0, 0, 0.2)':'rgba(0, 0, 0, 0.06)'?>;
+      overflow: hidden;
+    }
+    
+    .embed-card iframe {
+      width: 100%;
+      min-height: 400px;
+      border: 0;
+      border-radius: 12px;
+      background: <?= $theme==='dark'?'#0f172a':'#f8fafc'?>;
+    }
+    
+    .footer {
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid <?= $theme==='dark'?'rgba(255, 255, 255, 0.1)':'rgba(226, 232, 240, 0.6)'?>;
+      animation: fadeInUp 0.6s ease-out 0.5s backwards;
+    }
+    
+    .footer-logo {
+      font-size: 14px;
+      font-weight: 600;
+      color: <?= $theme==='dark'?'#94a3b8':'#64748b'?>;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s ease;
+    }
+    
+    .footer-logo:hover {
+      color: <?= $theme==='dark'?'#cbd5e1':'#475569'?>;
+    }
+    
+    .logo-accent {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+    
+    @media (max-width: 640px) {
+      .container {
+        padding: 32px 20px 64px;
+      }
+      
+      .name {
+        font-size: 28px;
+      }
+      
+      .bio {
+        font-size: 15px;
+      }
+      
+      .link {
+        font-size: 15px;
+        padding: 16px 20px;
+      }
+      
+      .avatar {
+        width: 100px;
+        height: 100px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="overlay">
-  <div class="wrap">
-    <?php if (!empty($profile['avatar'])): ?>
-      <img class="avatar" src="<?=htmlspecialchars($profile['avatar'])?>" alt="">
-    <?php endif; ?>
-    <div class="name"><?=htmlspecialchars($profile['display_name'])?></div>
-    <?php if (!empty($profile['bio'])): ?>
-      <div class="bio"><?=htmlspecialchars($profile['bio'])?></div>
-    <?php endif; ?>
+  <div class="container">
+    <div class="profile-header">
+      <?php if (!empty($profile['avatar'])): ?>
+        <img class="avatar" src="<?=htmlspecialchars($profile['avatar'])?>" alt="<?=htmlspecialchars($profile['display_name'])?>">
+      <?php endif; ?>
+      <h1 class="name"><?=htmlspecialchars($profile['display_name'])?></h1>
+      <?php if (!empty($profile['bio'])): ?>
+        <p class="bio"><?=htmlspecialchars($profile['bio'])?></p>
+      <?php endif; ?>
+    </div>
 
     <?php if ($socials): ?>
-      <div class="icons">
+      <div class="social-icons">
         <?php foreach ($socials as $s):
           $url = $s['url'] ?: '#';
           $label = ucfirst($s['platform']);
         ?>
-          <a class="icon" href="<?=htmlspecialchars($url)?>" target="_blank" rel="noopener" title="<?=htmlspecialchars($label)?>">
+          <a class="social-icon" href="<?=htmlspecialchars($url)?>" target="_blank" rel="noopener noreferrer" title="<?=htmlspecialchars($label)?>" aria-label="<?=htmlspecialchars($label)?>">
             <?=icon_svg($s['platform'])?>
           </a>
         <?php endforeach; ?>
       </div>
     <?php endif; ?>
 
-    <?php foreach ($links as $l): ?>
-      <a class="link" href="<?=htmlspecialchars($l['url'])?>" target="_blank" rel="noopener">
-        <?=htmlspecialchars($l['title'])?>
-      </a>
-    <?php endforeach; ?>
+    <?php if ($links): ?>
+      <div class="links-container">
+        <?php foreach ($links as $l): ?>
+          <a class="link" href="<?=htmlspecialchars($l['url'])?>" target="_blank" rel="noopener noreferrer">
+            <?=htmlspecialchars($l['title'])?>
+          </a>
+        <?php endforeach; ?>
+      </div>
+    <?php endif; ?>
 
     <?php if ($embeds): ?>
       <div class="embeds">
@@ -142,7 +411,12 @@ function icon_svg($p){
         <?php endforeach; ?>
       </div>
     <?php endif; ?>
-  </div>
+    
+    <div class="footer">
+      <a href="/" class="footer-logo">
+        <span>Powered by <span class="logo-accent">Rabetin</span>.bio</span>
+      </a>
+    </div>
   </div>
 </body>
 </html>
