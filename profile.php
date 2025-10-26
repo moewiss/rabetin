@@ -42,6 +42,45 @@ if (!empty($profile['bg_image'])) {
 }
 $font = $profile['font_family'] ?: 'system-ui';
 
+// Design customization settings
+$button_style = $profile['button_style'] ?? 'rounded';
+$button_color = $profile['button_color'] ?? '#667eea';
+$button_text_color = $profile['button_text_color'] ?? '#ffffff';
+$button_shadow = $profile['button_shadow'] ?? 1;
+$link_layout = $profile['link_layout'] ?? 'standard';
+$card_style = $profile['card_style'] ?? 'glass';
+$text_color_custom = $profile['text_color'] ?? null;
+
+// Button border radius based on style
+$button_border_radius = match($button_style) {
+  'pill' => '999px',
+  'sharp' => '4px',
+  default => '14px'
+};
+
+// Card styling based on card_style
+$card_bg = match($card_style) {
+  'solid' => ($theme === 'dark' ? 'rgba(30, 41, 59, 0.9)' : 'rgba(255, 255, 255, 0.95)'),
+  'flat' => ($theme === 'dark' ? 'rgba(15, 23, 42, 1)' : 'rgba(248, 250, 252, 1)'),
+  'card' => ($theme === 'dark' ? 'rgba(17, 24, 39, 1)' : 'rgba(255, 255, 255, 1)'),
+  'neon' => 'rgba(10, 10, 10, 0.85)',
+  default => ($theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.95)')
+};
+
+$card_border = match($card_style) {
+  'neon' => '2px solid ' . $button_color,
+  'flat' => 'none',
+  'glass' => '2px solid ' . ($theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(226, 232, 240, 0.8)'),
+  default => '2px solid ' . ($theme === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(226, 232, 240, 0.8)')
+};
+
+// Link width based on layout
+$link_max_width = match($link_layout) {
+  'full' => '100%',
+  'compact' => '400px',
+  default => '560px'
+};
+
 // Simple SVG icon map (inline, no external deps)
 function icon_svg($p){
   $icons = [
@@ -85,7 +124,7 @@ function icon_svg($p){
     body {
       font-family: <?=htmlspecialchars($font === 'system-ui' ? "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" : "'".$font."', 'Inter', sans-serif")?>;
       <?=$bgCss?>;
-      color: <?= $theme==='dark'?'#e2e8f0':'#1e293b'?>;
+      color: <?= $text_color_custom ?: ($theme==='dark'?'#e2e8f0':'#1e293b')?>;
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -156,13 +195,14 @@ function icon_svg($p){
       margin-bottom: 12px;
       line-height: 1.2;
       letter-spacing: -0.5px;
-      color: <?= $theme==='dark'?'#ffffff':'#0f172a'?>;
+      color: <?= $text_color_custom ?: ($theme==='dark'?'#ffffff':'#0f172a')?>;
     }
     
     .bio {
       font-size: 16px;
       line-height: 1.6;
-      color: <?= $theme==='dark'?'#cbd5e1':'#475569'?>;
+      color: <?= $text_color_custom ?: ($theme==='dark'?'#cbd5e1':'#475569')?>;
+      opacity: <?= $text_color_custom ? '0.8' : '1'?>;
       white-space: pre-wrap;
       max-width: 480px;
       margin: 0 auto;
@@ -207,30 +247,33 @@ function icon_svg($p){
     
     .links-container {
       width: 100%;
-      max-width: 560px;
+      max-width: <?=$link_max_width?>;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: <?=$link_layout==='compact'?'12px':'16px'?>;
     }
     
     .link {
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 18px 24px;
-      border-radius: 14px;
-      background: <?= $theme==='dark'?'rgba(255, 255, 255, 0.08)':'rgba(255, 255, 255, 0.95)'?>;
-      border: 2px solid <?= $theme==='dark'?'rgba(255, 255, 255, 0.12)':'rgba(226, 232, 240, 0.8)'?>;
-      color: <?= $theme==='dark'?'#ffffff':'#1e293b'?>;
-      font-size: 16px;
+      padding: <?=$link_layout==='compact'?'14px 20px':'18px 24px'?>;
+      border-radius: <?=$button_border_radius?>;
+      background: <?=$button_color?>;
+      border: <?=$card_border?>;
+      color: <?=$button_text_color?>;
+      font-size: <?=$link_layout==='compact'?'15px':'16px'?>;
       font-weight: 600;
       text-decoration: none;
       transition: all 0.2s ease;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 12px <?= $theme==='dark'?'rgba(0, 0, 0, 0.2)':'rgba(0, 0, 0, 0.06)'?>;
+      backdrop-filter: <?=$card_style==='glass'?'blur(10px)':'none'?>;
+      box-shadow: <?=$button_shadow?'0 4px 12px rgba(0, 0, 0, 0.2)':'none'?>;
       animation: fadeInUp 0.5s ease-out backwards;
       position: relative;
       overflow: hidden;
+      <?php if ($card_style === 'neon'): ?>
+        box-shadow: 0 0 20px <?=$button_color?>, 0 0 40px <?=$button_color?>40;
+      <?php endif; ?>
     }
     
     .link::before {
@@ -240,7 +283,7 @@ function icon_svg($p){
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, <?= $theme==='dark'?'rgba(255, 255, 255, 0.1)':'rgba(102, 126, 234, 0.1)'?>, transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
       transition: left 0.5s ease;
     }
     
@@ -250,9 +293,11 @@ function icon_svg($p){
     
     .link:hover {
       transform: translateY(-4px);
-      background: <?= $theme==='dark'?'rgba(255, 255, 255, 0.15)':'rgba(255, 255, 255, 1)'?>;
-      border-color: <?= $theme==='dark'?'rgba(255, 255, 255, 0.25)':'#667eea'?>;
-      box-shadow: 0 8px 24px <?= $theme==='dark'?'rgba(0, 0, 0, 0.3)':'rgba(102, 126, 234, 0.25)'?>;
+      filter: brightness(1.1);
+      box-shadow: <?=$button_shadow?'0 8px 24px rgba(0, 0, 0, 0.3)':'0 4px 16px rgba(0, 0, 0, 0.15)'?>;
+      <?php if ($card_style === 'neon'): ?>
+        box-shadow: 0 0 30px <?=$button_color?>, 0 0 60px <?=$button_color?>60;
+      <?php endif; ?>
     }
     
     .link:active {

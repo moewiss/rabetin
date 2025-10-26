@@ -27,6 +27,9 @@ $embeds = $pdo->prepare('SELECT * FROM embeds WHERE user_id=? AND is_active=1 OR
 $platforms = ['facebook','instagram','x','tiktok','youtube','email','linkedin','threads','github','reddit','twitch','discord'];
 $socialMap = [];
 foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
+
+// Fetch design templates
+$templates = $pdo->query('SELECT * FROM design_templates ORDER BY id ASC')->fetchAll();
 ?>
 <!doctype html>
 <html lang="en">
@@ -710,6 +713,7 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
   <?php endif; ?>
   <div class="tabs">
     <div class="tab <?=$activeTab==='profile'?'active':''?>" data-tab="profile">Profile</div>
+    <div class="tab <?=$activeTab==='design'?'active':''?>" data-tab="design">🎨 Design</div>
     <div class="tab <?=$activeTab==='background'?'active':''?>" data-tab="background">Background</div>
     <div class="tab <?=$activeTab==='socials'?'active':''?>" data-tab="socials">Social Icons</div>
     <div class="tab <?=$activeTab==='links'?'active':''?>" data-tab="links">Custom Links</div>
@@ -764,6 +768,116 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
           </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Design -->
+  <div class="panel <?=$activeTab==='design'?'active':''?>" id="panel-design">
+    <div class="card">
+      <h3>🎨 Design Your Page</h3>
+      <p style="color: #64748b; margin-bottom: 24px;">Choose a template or customize every detail of your profile page</p>
+      
+      <form action="/dashboard/save_design.php" method="post">
+        <!-- Template Presets -->
+        <div style="margin-bottom: 32px;">
+          <label style="margin-top: 0;">Choose a Template</label>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 12px;">
+            <?php foreach ($templates as $tpl): ?>
+              <div class="template-card" data-template="<?=htmlspecialchars($tpl['slug'])?>" 
+                   onclick="selectTemplate('<?=htmlspecialchars($tpl['slug'])?>')"
+                   style="cursor: pointer; padding: 16px; border-radius: 12px; border: 3px solid <?=($profile['template_preset']??'default')===$tpl['slug']?'#667eea':'#e2e8f0'?>; background: <?=htmlspecialchars($tpl['bg_color']??'#ffffff')?>; transition: all 0.2s ease; position: relative;">
+                <div style="text-align: center;">
+                  <div style="font-weight: 600; color: <?=htmlspecialchars($tpl['text_color']??'#1e293b')?>; margin-bottom: 4px;">
+                    <?=htmlspecialchars($tpl['name'])?>
+                  </div>
+                  <div style="font-size: 12px; color: <?=htmlspecialchars($tpl['text_color']??'#64748b')?>; opacity: 0.7; margin-bottom: 12px;">
+                    <?=htmlspecialchars($tpl['description'])?>
+                  </div>
+                  <div style="height: 60px; display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center;">
+                    <div style="width: 80%; height: 10px; background: <?=htmlspecialchars($tpl['button_color'])?>; border-radius: <?=$tpl['button_style']==='rounded'?'8px':($tpl['button_style']==='pill'?'999px':'4px')?>; box-shadow: <?=$tpl['button_shadow']?'0 4px 12px rgba(0,0,0,0.15)':'none'?>;"></div>
+                    <div style="width: 80%; height: 10px; background: <?=htmlspecialchars($tpl['button_color'])?>; border-radius: <?=$tpl['button_style']==='rounded'?'8px':($tpl['button_style']==='pill'?'999px':'4px')?>; box-shadow: <?=$tpl['button_shadow']?'0 4px 12px rgba(0,0,0,0.15)':'none'?>;"></div>
+                  </div>
+                  <?php if(($profile['template_preset']??'default')===$tpl['slug']): ?>
+                    <div style="position: absolute; top: 8px; right: 8px; background: #10b981; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700;">✓</div>
+                  <?php endif; ?>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+          <input type="hidden" name="template_preset" id="templatePreset" value="<?=htmlspecialchars($profile['template_preset']??'default')?>">
+        </div>
+
+        <hr style="border: none; border-top: 2px solid #e2e8f0; margin: 32px 0;">
+
+        <!-- Custom Design Settings -->
+        <h3 style="margin-bottom: 16px;">Custom Design Options</h3>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Or customize your design manually (will override template)</p>
+        
+        <div class="grid2">
+          <div>
+            <label>Button Style</label>
+            <select name="button_style">
+              <option value="rounded" <?=($profile['button_style']??'rounded')==='rounded'?'selected':''?>>Rounded (Default)</option>
+              <option value="sharp" <?=($profile['button_style']??'')==='sharp'?'selected':''?>>Sharp Corners</option>
+              <option value="pill" <?=($profile['button_style']??'')==='pill'?'selected':''?>>Pill Shape</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Link Layout</label>
+            <select name="link_layout">
+              <option value="standard" <?=($profile['link_layout']??'standard')==='standard'?'selected':''?>>Standard (Default)</option>
+              <option value="full" <?=($profile['link_layout']??'')==='full'?'selected':''?>>Full Width</option>
+              <option value="compact" <?=($profile['link_layout']??'')==='compact'?'selected':''?>>Compact</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid3" style="margin-top: 16px;">
+          <div>
+            <label>Button Color</label>
+            <input type="color" name="button_color" value="<?=htmlspecialchars($profile['button_color']??'#667eea')?>">
+          </div>
+
+          <div>
+            <label>Button Text Color</label>
+            <input type="color" name="button_text_color" value="<?=htmlspecialchars($profile['button_text_color']??'#ffffff')?>">
+          </div>
+
+          <div>
+            <label>Text Color (Optional)</label>
+            <input type="color" name="text_color" value="<?=htmlspecialchars($profile['text_color']??'#1e293b')?>">
+          </div>
+        </div>
+
+        <div class="grid2" style="margin-top: 16px;">
+          <div>
+            <label>Card Style</label>
+            <select name="card_style">
+              <option value="glass" <?=($profile['card_style']??'glass')==='glass'?'selected':''?>>Glassmorphism</option>
+              <option value="solid" <?=($profile['card_style']??'')==='solid'?'selected':''?>>Solid</option>
+              <option value="flat" <?=($profile['card_style']??'')==='flat'?'selected':''?>>Flat</option>
+              <option value="card" <?=($profile['card_style']??'')==='card'?'selected':''?>>Card</option>
+              <option value="neon" <?=($profile['card_style']??'')==='neon'?'selected':''?>>Neon</option>
+            </select>
+          </div>
+
+          <div style="display: flex; align-items: center; padding-top: 20px;">
+            <label style="display: flex; align-items: center; gap: 8px; margin: 0; cursor: pointer;">
+              <input type="checkbox" name="button_shadow" value="1" <?=($profile['button_shadow']??1)?'checked':''?>>
+              <span>Button Shadow</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <button class="btn" type="submit">Save Design</button>
+        </div>
+        
+        <small style="display: block; margin-top: 12px;">
+          💡 Tip: Select a template for instant styling, or customize individual settings below for full control
+        </small>
+      </form>
     </div>
   </div>
 
@@ -960,6 +1074,18 @@ foreach ($socials as $s) { $socialMap[$s['platform']] = $s; }
       }
     });
   });
+  
+  // Template Selection
+  function selectTemplate(slug) {
+    document.getElementById('templatePreset').value = slug;
+    document.querySelectorAll('.template-card').forEach(card => {
+      if (card.dataset.template === slug) {
+        card.style.borderColor = '#667eea';
+      } else {
+        card.style.borderColor = '#e2e8f0';
+      }
+    });
+  }
   
   // Tabs with URL updates
   document.querySelectorAll('.tab').forEach(t=>{
