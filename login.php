@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if ($msg): ?><div class="msg"><?=htmlspecialchars($msg)?></div><?php endif; ?>
     <?php if ($error): ?><div class="error"><?=htmlspecialchars($error)?></div><?php endif; ?>
     <form method="post" autocomplete="on">
-      <label>Username</label>
+      <label>Username1234</label>
       <input name="username" required>
       <label>Password</label>
       <input type="password" name="password" required>
