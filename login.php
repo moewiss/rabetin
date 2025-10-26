@@ -27,33 +27,248 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Log in — Rabetin.bio</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:0;background:#0f172a;color:#e2e8f0}
-    .wrap{max-width:420px;margin:6vh auto;padding:24px;background:#111827;border:1px solid #253046;border-radius:14px}
-    input,button{width:100%;padding:12px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:#e2e8f0;margin-top:10px}
-    .msg{background:#064e3b;padding:10px;border-radius:10px;margin-bottom:10px}
-    .error{background:#7f1d1d;padding:10px;border-radius:10px;margin-bottom:10px}
-    a{color:#93c5fd}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 400px;
+      animation: fadeIn 0.6s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 48px 40px;
+    }
+    
+    .logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .logo h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      letter-spacing: -0.5px;
+    }
+    
+    .logo-accent {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    h2 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+    
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .alert-success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #6ee7b7;
+    }
+    
+    .alert-error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 15px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #1a1a1a;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    
+    input::placeholder {
+      color: #9ca3af;
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 8px;
+      font-family: inherit;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 32px 0 24px 0;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+    
+    .footer-link {
+      text-align: center;
+      font-size: 14px;
+      color: #6b7280;
+    }
+    
+    .footer-link a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s ease;
+    }
+    
+    .footer-link a:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 480px) {
+      .card {
+        padding: 32px 24px;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h2>Log in</h2>
-    <?php if ($msg): ?><div class="msg"><?=htmlspecialchars($msg)?></div><?php endif; ?>
-    <?php if ($error): ?><div class="error"><?=htmlspecialchars($error)?></div><?php endif; ?>
-    <form method="post" autocomplete="on">
-      <label>Username</label>
-      <input name="username" required>
-      <label>Password</label>
-      <input type="password" name="password" required>
-      <button type="submit">Log in</button>
-    </form>
-    <p>No account? <a href="/signup.php">Create one</a></p>
+  <div class="container">
+    <div class="card">
+      <div class="logo">
+        <h1><span class="logo-accent">Rabetin</span>.bio</h1>
+      </div>
+      
+      <h2>Welcome back</h2>
+      <p class="subtitle">Log in to your account to continue</p>
+      
+      <?php if ($msg): ?>
+        <div class="alert alert-success"><?=htmlspecialchars($msg)?></div>
+      <?php endif; ?>
+      
+      <?php if ($error): ?>
+        <div class="alert alert-error"><?=htmlspecialchars($error)?></div>
+      <?php endif; ?>
+      
+      <form method="post" autocomplete="on">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Enter your username" required autofocus>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        
+        <button type="submit" class="btn">Log in</button>
+      </form>
+      
+      <div class="divider">or</div>
+      
+      <p class="footer-link">Don't have an account? <a href="/signup.php">Sign up</a></p>
+    </div>
   </div>
 </body>
 </html>
